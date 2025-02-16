@@ -64,32 +64,35 @@ const getUserEvents = async (req, res) => {
   }
 };
 
-// ✅ Remove Profile Picture
+// Remove Profile Picture
+
 const removeProfilePicture = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.profilePic) {
+    // ✅ Ensure profilePic exists before deleting
+    if (!user.profilePic || user.profilePic === "/default-profile.jpg") {
       return res.status(400).json({ message: "No profile picture to remove" });
     }
 
-    // Correct profile image path
     const filePath = path.join(
       __dirname,
       "../uploads/profile",
       path.basename(user.profilePic)
     );
 
-    // Delete the image file if it exists
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
-    user.profilePic = ""; // Remove from database
+    user.profilePic = "/default-profile.jpg"; // ✅ Reset to default instead of empty string
     await user.save();
 
-    res.json({ message: "Profile picture removed successfully", user });
+    res.json({
+      message: "Profile picture removed successfully",
+      user: { ...user.toObject(), profilePic: "/default-profile.jpg" },
+    });
   } catch (error) {
     console.error("Error removing profile picture:", error);
     res.status(500).json({ message: "Server Error", error: error.message });

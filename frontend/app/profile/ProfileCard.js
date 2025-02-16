@@ -5,16 +5,20 @@ import {
   FaUserEdit,
   FaTrash,
   FaEdit,
+  FaCamera,
 } from "react-icons/fa";
+import ProfileEvent from "./ProfileEvent";
 
 const ProfileCard = ({
   user,
   editMode,
+  setUser,
   setEditMode,
-  formData,
+  formData = { name: "", email: "", phone: "" },
   handleChange,
   handleSave,
-  handleDeleteEvent, // Function to delete event
+  handleDeleteEvent,
+  handleRemoveProfilePic, // ✅ Receive as prop from Profile.js
 }) => {
   const [organizedEvents, setOrganizedEvents] = useState([]);
   const [participatedEvents, setParticipatedEvents] = useState([]);
@@ -24,6 +28,7 @@ const ProfileCard = ({
       ? `http://localhost:5000${user.profilePic}`
       : "/default-profile.jpg"
   );
+  const [isEditingPhoto, setIsEditingPhoto] = useState(false);
 
   // Fetch Events
   useEffect(() => {
@@ -59,6 +64,10 @@ const ProfileCard = ({
         const data = await response.json();
         if (response.ok) {
           setProfilePic(`http://localhost:5000${data.user.profilePic}`);
+          setUser((prevUser) => ({
+            ...prevUser,
+            profilePic: data.user.profilePic, // ✅ Now setUser is defined
+          }));
         }
       } catch (error) {
         console.error("Error uploading profile picture:", error);
@@ -66,66 +75,77 @@ const ProfileCard = ({
     }
   };
 
-  // Handle Profile Picture Removal
-  const handleRemoveProfilePic = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/user/profile/remove-photo",
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+  useEffect(() => {
+    setProfilePic(
+      user?.profilePic
+        ? `http://localhost:5000${user.profilePic}`
+        : "/default-profile.jpg"
+    );
+  }, [user?.profilePic]); // ✅ Update profile pic when user data changes
 
-      const data = await response.json();
-      if (response.ok) {
-        setProfilePic("/default-profile.jpg");
-      }
-    } catch (error) {
-      console.error("Error removing profile picture:", error);
-    }
+  // Handle Save with Reset
+  const handleSaveWithReset = () => {
+    handleSave();
+    setIsEditingPhoto(false);
   };
 
   if (loading) return <p className="text-center">Loading profile...</p>;
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md text-center">
+    <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg text-center">
       <h2 className="text-3xl font-bold text-gray-800 mb-4">My Profile</h2>
 
       {/* Profile Picture */}
-      <div className="relative flex justify-center">
-        <img
-          src={profilePic}
-          alt="Profile"
-          className="w-28 h-28 rounded-full border-4 border-cyan-600 shadow-lg"
-        />
-
-        {/* Edit Profile Picture */}
-        <div className="absolute bottom-0 right-10 flex flex-col items-center">
-          <label
-            htmlFor="profilePic"
-            className="bg-gray-700 text-white p-2 rounded-full cursor-pointer flex items-center gap-2"
-          >
-            <FaUserEdit />
-            <span> Edit Photo</span>
-          </label>
-          <input
-            type="file"
-            id="profilePic"
-            className="hidden"
-            onChange={handleProfilePicChange}
+      <div className="relative flex justify-center group">
+        <div className="relative w-40 h-40">
+          <img
+            src={profilePic}
+            alt="Profile"
+            className="w-full h-full rounded-full border-4 border-cyan-600 shadow-lg group-hover:opacity-80 transition"
           />
 
-          {/* Remove Profile Picture */}
-          {user?.profilePic && (
-            <button
-              onClick={handleRemoveProfilePic}
-              className="mt-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-800 transition"
-            >
-              Remove Photo
-            </button>
-          )}
+          {/* Edit Icon (Camera) */}
+          <button
+            onClick={() => setIsEditingPhoto(!isEditingPhoto)}
+            className="absolute bottom-1 right-1 bg-gray-700 text-white p-1.5 rounded-full cursor-pointer hover:bg-gray-800 transition"
+          >
+            <FaCamera className="text-lg" />
+          </button>
         </div>
+
+        {/* Add/Change/Remove Photo Options */}
+        {isEditingPhoto && (
+          <div className="absolute bottom-12 right-6 flex flex-col items-center space-y-2 bg-white p-3 rounded-lg shadow-md">
+            {/* Add/Change Photo */}
+            <label
+              htmlFor="profilePic"
+              className="text-gray-700 hover:text-cyan-700 cursor-pointer flex items-center gap-2"
+            >
+              <FaUserEdit />
+              <span>
+                {profilePic === "/default-profile.jpg"
+                  ? "Add Photo"
+                  : "Change Photo"}
+              </span>
+            </label>
+            <input
+              type="file"
+              id="profilePic"
+              className="hidden"
+              onChange={handleProfilePicChange}
+            />
+
+            {/* ✅ Only Show "Remove" If Profile Pic Exists */}
+            {user?.profilePic && user.profilePic !== "/default-profile.jpg" && (
+              <button
+                onClick={handleRemoveProfilePic}
+                className="text-red-600 hover:text-red-800 flex items-center gap-2"
+              >
+                <FaTrash /> Remove
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Editable Form */}
@@ -156,15 +176,15 @@ const ProfileCard = ({
             placeholder="Phone"
           />
           <button
-            onClick={handleSave}
+            onClick={handleSaveWithReset}
             className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
           >
             Save Changes
           </button>
         </div>
       ) : (
-        <div className="text-center mt-6 space-y-3">
-          <p className="text-lg font-semibold">{user?.name || "No Name"}</p>
+        <div className="text-center mt-6 space-y-3 text-lg font-bold">
+          <p className="text-lg font-extrabold">{user?.name || "No Name"}</p>
           <p className="text-gray-600 flex justify-center items-center gap-2">
             <FaEnvelope /> {user?.email || "No Email"}
           </p>
@@ -172,71 +192,16 @@ const ProfileCard = ({
             <FaPhone /> {user?.phone || "No phone added"}
           </p>
           <button
-            onClick={() => setEditMode(true)}
+            onClick={() => {
+              setEditMode(true);
+              setIsEditingPhoto(true);
+            }}
             className="mt-4 bg-cyan-700 text-white px-4 py-2 rounded-md hover:bg-cyan-800 transition w-full"
           >
             Edit Profile
           </button>
         </div>
       )}
-
-      {/* Organized Events */}
-      <div className="mt-8 text-left">
-        <h3 className="text-xl font-bold text-gray-800 mb-3">
-          Organized Events
-        </h3>
-        {organizedEvents.length > 0 ? (
-          <ul className="space-y-2">
-            {organizedEvents.map((event) => (
-              <li
-                key={event._id}
-                className="p-3 bg-gray-100 rounded-md shadow flex justify-between items-center"
-              >
-                <div>
-                  <p className="font-semibold">{event.title}</p>
-                  <p className="text-gray-600">
-                    {new Date(event.date).toDateString()}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button className="text-blue-600 hover:text-blue-800">
-                    <FaEdit />
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-800"
-                    onClick={() => handleDeleteEvent(event._id)}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No organized events found.</p>
-        )}
-      </div>
-
-      {/* Participated Events */}
-      <div className="mt-8 text-left">
-        <h3 className="text-xl font-bold text-gray-800 mb-3">
-          Participated Events
-        </h3>
-        {participatedEvents.length > 0 ? (
-          <ul className="space-y-2">
-            {participatedEvents.map((event) => (
-              <li key={event._id} className="p-3 bg-gray-100 rounded-md shadow">
-                <p className="font-semibold">{event.title}</p>
-                <p className="text-gray-600">
-                  {new Date(event.date).toDateString()}
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No participated events found.</p>
-        )}
-      </div>
     </div>
   );
 };

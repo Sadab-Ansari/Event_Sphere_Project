@@ -36,6 +36,13 @@ router.put(
   userController.updateUserProfile
 );
 
+// ✅ Remove Profile Picture (NEW ROUTE)
+router.delete(
+  "/profile/remove-picture",
+  authMiddleware,
+  userController.removeProfilePicture
+);
+
 // ✅ Get User's Participated Events
 router.get("/profile/events", authMiddleware, userController.getUserEvents);
 

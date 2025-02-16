@@ -1,12 +1,20 @@
 const mongoose = require("mongoose");
 
-const UserSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String }, // Optional for Google OAuth
-  googleId: { type: String, unique: true }, // Store Google ID
-  phone: { type: String, default: "" },
-  profilePic: { type: String, default: "/uploads/profile/default.jpg" }, // ✅ Default Profile Pic
-});
+const UserSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: {
+      type: String,
+      required: function () {
+        return !this.googleId;
+      }, // Required only for non-Google users
+    },
+    googleId: { type: String, index: true }, //  Use index instead of unique to avoid conflicts
+    phone: { type: String, default: "" },
+    profilePic: { type: String, default: "/default-profile.jpg" }, //  Ensure it exists
+  },
+  { timestamps: true }
+); //  Adds createdAt & updatedAt
 
 module.exports = mongoose.model("User", UserSchema);

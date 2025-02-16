@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { FaUser, FaLock, FaEye, FaEyeSlash, FaHashtag } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
 const Signup = () => {
@@ -9,9 +10,14 @@ const Signup = () => {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
+    code: "",
   });
+
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -22,20 +28,29 @@ const Signup = () => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:5000/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name, // ✅ Ensure name is included
+          email: formData.email, // ✅ Ensure email is included
+          password: formData.password, // ✅ Ensure password is included
+          code: formData.code, // ✅ Ensure code is included
+        }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        setSuccessMessage(
-          "You have successfully registered. Redirecting to login page..."
-        );
+        setSuccessMessage("Signup successful! Redirecting to login...");
         setTimeout(() => {
-          router.push("/login"); // Redirect to login page after 2 seconds
+          router.push("/login");
         }, 2000);
       } else {
         setError(data.message || "Signup failed");
@@ -45,74 +60,171 @@ const Signup = () => {
     }
   };
 
+  const handleSendCode = async () => {
+    if (!formData.email) {
+      setError("Please enter an email address first.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setSuccessMessage("Verification code sent to your email.");
+      } else {
+        setError(data.message || "Failed to send code.");
+      }
+    } catch (err) {
+      setError("Error sending code. Check your internet connection.");
+    }
+  };
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-10 rounded-lg shadow-md w-[450px]">
-        <h2 className="text-3xl font-bold mb-4 text-center">Sign Up</h2>
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-900 text-white px-6">
+      <h1 className="text-4xl font-extrabold text-blue-500 mb-6">Signup</h1>
 
-        {/* Google Signup Button with Click Handler */}
-        <button
-          type="button"
-          onClick={() =>
-            (window.location.href = "http://localhost:5000/api/auth/google")
-          }
-          className="w-full bg-cyan-600 text-white p-3 rounded hover:bg-red-800 flex items-center justify-center space-x-2"
-        >
-          <FcGoogle size={24} />
-          <span>Login with Google</span>
-        </button>
+      {/* Error & Success Messages */}
+      {error && <p className="text-red-500 text-center mb-3">{error}</p>}
+      {successMessage && (
+        <p className="text-green-500 text-center mb-3">{successMessage}</p>
+      )}
 
-        <div className="text-center text-gray-500 my-3">OR</div>
-
-        {/* Display Error & Success Messages */}
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        {successMessage && (
-          <p className="text-green-500 text-center">{successMessage}</p>
-        )}
-
-        {/* Signup Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Signup Form */}
+      <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm">
+        <div className="relative">
+          <FaUser className="absolute left-4 top-3.5 text-gray-400" size={18} />
           <input
             type="text"
             name="name"
-            placeholder="Full Name"
+            placeholder="Full name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-4 pl-12 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+        </div>
+
+        <div className="relative">
+          <FaUser className="absolute left-4 top-3.5 text-gray-400" size={18} />
           <input
             type="email"
             name="email"
-            placeholder="Email Address"
+            placeholder="Email address"
             value={formData.email}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-4 pl-12 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+        </div>
+
+        <div className="relative">
+          <FaLock className="absolute left-4 top-3.5 text-gray-400" size={18} />
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-4 pl-12 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
           <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-800"
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-3.5 text-gray-400"
           >
-            Sign Up
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
-        </form>
+        </div>
 
-        <p className="text-center mt-4">
-          Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Login
-          </a>
-        </p>
+        <div className="relative">
+          <FaLock className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            name="confirmPassword"
+            placeholder="Confirm password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="w-full p-4 pl-12 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-4 top-3.5 text-gray-400"
+          >
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
+
+        {/* Code Input with Send Button */}
+        <div className="flex space-x-3">
+          <div className="relative flex-grow">
+            <FaHashtag
+              className="absolute left-4 top-3.5 text-gray-400"
+              size={18}
+            />
+            <input
+              type="text"
+              name="code"
+              placeholder="Code"
+              value={formData.code}
+              onChange={handleChange}
+              className="w-full p-4 pl-12 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleSendCode} // ✅ This calls the function
+            className="px-4 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition font-semibold"
+          >
+            Send code
+          </button>
+        </div>
+
+        {/* Terms & Conditions */}
+        <div className="flex items-center space-x-3 text-gray-400 text-sm">
+          <input
+            type="checkbox"
+            id="terms"
+            className="accent-blue-500 w-5 h-5"
+          />
+          <label htmlFor="terms" className="leading-relaxed">
+            I confirm that I have read, consent, and agree to the{" "}
+            <a href="#" className="text-blue-400 hover:underline">
+              Terms of Use
+            </a>{" "}
+            and{" "}
+            <a href="#" className="text-blue-400 hover:underline">
+              Privacy Policy
+            </a>
+            .
+          </label>
+        </div>
+
+        {/* Signup Button */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition font-semibold"
+        >
+          Sign up
+        </button>
+      </form>
+
+      {/* Forgot Password & Login */}
+      <div className="flex justify-between text-sm mt-6 text-gray-400 w-full max-w-sm">
+        <a href="#" className="hover:underline">
+          Forgot password?
+        </a>
+        <a href="/login" className="hover:underline">
+          Log in
+        </a>
       </div>
     </div>
   );

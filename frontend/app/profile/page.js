@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ProfileCard from "./ProfileCard";
+import ProfileEvent from "./ProfileEvent";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -53,6 +54,34 @@ const Profile = () => {
       .catch((err) => console.error("Error updating profile:", err));
   };
 
+  // ✅ Handle Profile Picture Removal (Fixed)
+  const handleRemoveProfilePic = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/user/profile/remove-picture",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUser((prevUser) => ({
+          ...prevUser,
+          profilePic: "", // ✅ Ensure profilePic is updated in global state
+        }));
+      } else {
+        console.error("Error:", data.message);
+      }
+    } catch (error) {
+      console.error("Error removing profile picture:", error);
+    }
+  };
+
   const handleDeleteEvent = async (eventId) => {
     try {
       const response = await fetch(
@@ -85,18 +114,32 @@ const Profile = () => {
 
   return (
     <ProtectedRoute>
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-blue-500 to-cyan-500 p-6">
+      <div className="flex flex-col items-center min-h-screen bg-gradient-to-r from-blue-500 to-cyan-500 p-6">
+        {/* Profile Card */}
         <ProfileCard
           user={user}
+          setUser={setUser}
           editMode={editMode}
           setEditMode={setEditMode}
           formData={formData}
           handleChange={handleChange}
           handleSave={handleSave}
-          organizedEvents={organizedEvents}
-          participatedEvents={participatedEvents}
-          handleDeleteEvent={handleDeleteEvent}
+          handleRemoveProfilePic={handleRemoveProfilePic} // ✅ Pass as prop
         />
+
+        {/* Show Organized Events only if user has organized events */}
+        {organizedEvents.length > 0 && (
+          <ProfileEvent
+            events={organizedEvents}
+            type="organized"
+            handleDeleteEvent={handleDeleteEvent}
+          />
+        )}
+
+        {/* Show Participated Events only if user has participated in events */}
+        {participatedEvents.length > 0 && (
+          <ProfileEvent events={participatedEvents} type="participated" />
+        )}
       </div>
     </ProtectedRoute>
   );

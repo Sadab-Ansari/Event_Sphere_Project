@@ -8,8 +8,8 @@ import { useRouter } from "next/navigation";
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // Success message state
-  const [showPassword, setShowPassword] = useState(false); // Password visibility state
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -20,6 +20,7 @@ const Login = () => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
+
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -29,11 +30,13 @@ const Login = () => {
 
       const data = await response.json();
       if (response.ok) {
+        // Store token in localStorage
+        localStorage.setItem("token", data.token);
         setSuccessMessage(
           "You have successfully logged in. Redirecting to dashboard..."
         );
         setTimeout(() => {
-          router.push("/dashboard"); // Redirect after login
+          router.push("/dashboard");
         }, 2000);
       } else {
         setError(data.message || "Login failed");
@@ -44,78 +47,112 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-10 rounded-lg shadow-md w-[450px]">
-        <h2 className="text-3xl font-bold mb-4 text-center">Login</h2>
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-900 text-white px-6">
+      <h1 className="text-4xl font-extrabold text-blue-500 mb-6">Login</h1>
 
-        {/* Google Login Button */}
-        <button
-          type="button"
-          onClick={() =>
-            (window.location.href = "http://localhost:5000/api/auth/google")
-          }
-          className="w-full bg-red-600 text-white p-3 rounded hover:bg-red-800 flex items-center justify-center space-x-2"
-        >
-          <FcGoogle size={24} />
-          <span>Login with Google</span>
-        </button>
+      {/* Info Text */}
+      <p className="text-gray-400 text-sm mb-8 text-center leading-relaxed">
+        Only login via email, Google, or +86 phone number <br />
+        login is supported in your region.
+      </p>
 
-        <div className="text-center text-gray-500 my-3">OR</div>
+      {/* Error & Success Messages */}
+      {error && <p className="text-red-500 text-center mb-3">{error}</p>}
+      {successMessage && (
+        <p className="text-green-500 text-center mb-3">{successMessage}</p>
+      )}
 
-        {/* Error & Success Messages */}
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        {successMessage && (
-          <p className="text-green-500 text-center">{successMessage}</p>
-        )}
-
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative">
-            <FaUser className="absolute left-3 top-3 text-gray-700" size={18} />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-2 pl-10 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <div className="relative">
-            <FaLock className="absolute left-3 top-3 text-gray-700" size={18} />
-            <input
-              type={showPassword ? "text" : "password"} // Toggle password visibility
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-2 pl-10 border border-gray-300 rounded"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)} // Toggle function
-              className="absolute right-3 top-3"
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Eye icon */}
-            </button>
-          </div>
+      {/* Login Form */}
+      <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm">
+        <div className="relative">
+          <FaUser className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <input
+            type="email"
+            name="email"
+            placeholder="Phone number / email address"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full p-4 pl-12 bg-gray-900 border border-gray-700 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div className="relative">
+          <FaLock className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full p-4 pl-12 bg-gray-900 border border-gray-700 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
           <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-800"
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-3.5 text-gray-400"
           >
-            Login
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
-        </form>
+        </div>
 
-        <p className="text-center mt-4">
-          Don't have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:underline">
-            Sign Up
-          </a>
-        </p>
+        {/* Terms & Conditions */}
+        <div className="flex items-center space-x-3 text-gray-400 text-sm">
+          <input
+            type="checkbox"
+            id="terms"
+            className="accent-blue-500 w-5 h-5"
+          />
+          <label htmlFor="terms" className="leading-relaxed">
+            I confirm that I have read, consent, and agree to the{" "}
+            <a href="#" className="text-blue-400 hover:underline">
+              Terms of Use
+            </a>{" "}
+            and{" "}
+            <a href="#" className="text-blue-400 hover:underline">
+              Privacy Policy
+            </a>
+            .
+          </label>
+        </div>
+
+        {/* Login Button */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition font-semibold"
+        >
+          Log in
+        </button>
+      </form>
+
+      {/* Forgot Password & Sign Up */}
+      <div className="flex justify-between text-sm mt-6 text-gray-400 w-full max-w-sm">
+        <a href="#" className="hover:underline">
+          Forgot password?
+        </a>
+        <a href="/signup" className="hover:underline">
+          Sign up
+        </a>
       </div>
+
+      {/* Divider */}
+      <div className="flex items-center my-6 w-full max-w-sm">
+        <div className="flex-grow h-px bg-gray-600"></div>
+        <span className="px-4 text-gray-400 text-sm">OR</span>
+        <div className="flex-grow h-px bg-gray-600"></div>
+      </div>
+
+      {/* Google Login Button */}
+      <button
+        type="button"
+        onClick={() =>
+          (window.location.href = "http://localhost:5000/api/auth/google")
+        }
+        className="w-full max-w-sm bg-gray-800 text-white p-4 rounded-xl flex items-center justify-center space-x-3 hover:bg-gray-700 transition font-semibold"
+      >
+        <FcGoogle size={22} />
+        <span>Log in with Google</span>
+      </button>
     </div>
   );
 };
