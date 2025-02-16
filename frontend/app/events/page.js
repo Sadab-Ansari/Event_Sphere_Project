@@ -7,7 +7,7 @@ const EventsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/events")
+    fetch("http://localhost:5000/api/events/all")
       .then((res) => res.json())
       .then((data) => setEvents(data));
   }, []);
@@ -17,13 +17,13 @@ const EventsPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 ">
-      <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-        Events
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">
+        Explore Events
       </h1>
 
       {/* Search Field */}
-      <div className="flex justify-center mb-6">
+      <div className="flex justify-center mb-8">
         <input
           type="text"
           placeholder="Search events..."
@@ -34,21 +34,53 @@ const EventsPage = () => {
       </div>
 
       {/* Event List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (
-            <div key={event._id} className="bg-white p-4 rounded-2xl shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-800">
-                {event.title}
-              </h2>
-              <p className="text-gray-600">
-                {new Date(event.date).toDateString()}
-              </p>
-              <p className="text-gray-500">{event.location}</p>
+            <div
+              key={event._id}
+              className="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-105 transition"
+            >
+              {/* Display Event Banner (If No Image, Use Default Design) */}
+              {event.banner ? (
+                <img
+                  src={`http://localhost:5000${event.banner}`}
+                  alt={event.title}
+                  className="w-full h-48 object-cover rounded-t-2xl"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-300 flex items-center justify-center text-gray-600 text-lg">
+                  No Image Available
+                </div>
+              )}
+
+              {/* Event Details */}
+              <div className="p-6 text-center">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  {event.title}
+                </h2>
+                <p className="text-gray-600 text-lg">
+                  {new Date(event.date).toDateString()}
+                </p>
+                <p className="text-gray-500 text-lg">
+                  <span className="font-medium">Location:</span>{" "}
+                  {event.location}
+                </p>
+
+                {/* Buttons (Stacked in Mobile) */}
+                <div className="flex flex-col md:flex-row justify-center gap-4 mt-6">
+                  <button className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-800 transition">
+                    View Details
+                  </button>
+                  <button className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-800 transition">
+                    Participate
+                  </button>
+                </div>
+              </div>
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-500 col-span-full">
+          <p className="text-center text-gray-500 col-span-full text-xl">
             No events found.
           </p>
         )}

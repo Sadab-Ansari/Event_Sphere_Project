@@ -154,8 +154,7 @@ const Navbar = () => {
                 href="/organize-event"
                 className="flex items-center gap-2 text-gray-700 hover:text-blue-500"
               >
-                <FaCalendarAlt size={20} />{" "}
-                {/* Ensure you import the correct icon */}
+                <MdEvent size={20} /> {/* Ensure you import the correct icon */}
                 <span>Organize Event</span>
               </Link>
 

@@ -5,6 +5,8 @@ const eventSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   location: { type: String, required: true },
   description: { type: String },
+  banner: { type: String }, // Stores the path to the banner image
+
   organizer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
