@@ -1,6 +1,19 @@
+import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const ProfileEvent = ({ events = [], type, handleDeleteEvent }) => {
+  const [isClient, setIsClient] = useState(false); // Track if it's the client-side render
+  const router = useRouter(); // Initialize the useRouter hook from next/navigation
+
+  useEffect(() => {
+    setIsClient(true); // Set to true once component is mounted on client side
+  }, []);
+
+  // Prevent usage of `useRouter` until component is mounted
+  if (!isClient) return null;
+
   return (
     <div className="mt-8 text-left">
       <h3 className="text-xl font-bold text-gray-800 mb-3">
@@ -21,14 +34,26 @@ const ProfileEvent = ({ events = [], type, handleDeleteEvent }) => {
               </div>
               {type === "organized" && (
                 <div className="flex gap-2">
-                  <button className="text-blue-600 hover:text-blue-800">
-                    <FaEdit />
-                  </button>
+                  <Link
+                    href={`/edit-event/${event._id}`}
+                    className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition flex items-center gap-2"
+                  >
+                    <FaEdit className="text-white text-2xl" />
+                    <span>Edit</span>
+                  </Link>
                   <button
                     className="text-red-600 hover:text-red-800"
-                    onClick={() => handleDeleteEvent(event._id)}
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to delete this event?"
+                        )
+                      ) {
+                        handleDeleteEvent(event._id);
+                      }
+                    }}
                   >
-                    <FaTrash />
+                    <FaTrash className="text-red-600 text-2xl" />
                   </button>
                 </div>
               )}

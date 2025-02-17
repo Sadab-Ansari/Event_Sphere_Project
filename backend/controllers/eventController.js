@@ -52,16 +52,35 @@ exports.registerForEvent = async (req, res) => {
     if (!event) return res.status(404).json({ error: "Event not found" });
 
     // Check if user is already registered
-    if (event.registeredUsers.includes(req.user.id)) {
+    if (event.participants.includes(req.user.id)) {
       return res
         .status(400)
         .json({ error: "You are already registered for this event." });
     }
 
-    event.registeredUsers.push(req.user.id);
+    event.participants.push(req.user.id);
+
     await event.save();
     res.status(200).json({ message: "Registered successfully", event });
   } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Get Single Event by ID
+exports.getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.eventId)
+      .populate("organizer", "name email")
+      .populate("participants", "name email");
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    res.status(200).json(event);
+  } catch (error) {
+    console.error("Error fetching event:", error);
     res.status(500).json({ error: "Server error" });
   }
 };

@@ -2,6 +2,7 @@ const express = require("express");
 const {
   createEvent,
   getEvents,
+  getEventById,
   registerForEvent,
   deleteEvent,
 } = require("../controllers/eventController");
@@ -58,6 +59,9 @@ router.post("/create", authMiddleware, (req, res, next) => {
 
 // Get All Events (Anyone can access)
 router.get("/all", getEvents);
+
+// Get Single Event by ID (Anyone can access)
+router.get("/:eventId", getEventById);
 
 // Register for an Event (Only logged-in users)
 router.post("/register/:eventId", authMiddleware, registerForEvent);

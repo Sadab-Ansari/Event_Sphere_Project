@@ -147,7 +147,7 @@ const Navbar = () => {
                 href="/profile"
                 className="flex items-center space-x-2 text-gray-700 hover:text-blue-500"
               >
-                <FaUserCircle size={24} />
+                <FaUserCircle size={24} className="text-red-700" />
                 <span>Profile</span>
               </Link>
               <Link
