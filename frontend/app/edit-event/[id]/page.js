@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation"; // ✅ Use useParams() for dynamic routing
+import { useRouter, useParams } from "next/navigation";
 
 const EditEventPage = () => {
-  const { id } = useParams(); // ✅ Correct way to get event ID from URL
+  const { id } = useParams();
   const router = useRouter();
 
   const [event, setEvent] = useState({
@@ -13,8 +13,11 @@ const EditEventPage = () => {
     description: "",
     banner: "",
   });
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // ✅ Success message state
 
   useEffect(() => {
     if (!id) {
@@ -26,7 +29,6 @@ const EditEventPage = () => {
 
     const fetchEvent = async () => {
       try {
-        console.log("Fetching event with ID:", id);
         const response = await fetch(`http://localhost:5000/api/events/${id}`);
         if (!response.ok) {
           throw new Error(
@@ -48,12 +50,17 @@ const EditEventPage = () => {
   }, [id]);
 
   const handleChange = (e) => {
-    setEvent({ ...event, [e.target.name]: e.target.value });
+    if (e.target.name === "banner") {
+      setSelectedFile(e.target.files[0]);
+    } else {
+      setEvent({ ...event, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage(""); // Reset success message on submit
 
     if (!event.title || !event.date || !event.location || !event.description) {
       setError("All fields are required.");
@@ -66,16 +73,27 @@ const EditEventPage = () => {
       return;
     }
 
+    const formData = new FormData();
+    formData.append("title", event.title);
+    formData.append("description", event.description);
+    formData.append("date", event.date);
+    formData.append("location", event.location);
+    formData.append("maxParticipants", event.maxParticipants || 100);
+    if (selectedFile) {
+      formData.append("banner", selectedFile);
+    } else {
+      formData.append("banner", event.banner); // Preserve current banner if no new file selected
+    }
+
     try {
       const response = await fetch(
         `http://localhost:5000/api/events/update/${id}`,
         {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(event),
+          body: formData, // Send FormData containing the file
         }
       );
 
@@ -84,8 +102,11 @@ const EditEventPage = () => {
         throw new Error(errorData || "Failed to update event");
       }
 
-      console.log("Event updated successfully!");
-      router.push(`/events/${id}`);
+      setSuccessMessage("Event updated successfully!");
+
+      setTimeout(() => {
+        router.push("/events");
+      }, 2000);
     } catch (err) {
       console.error("Error updating event:", err);
       setError(err.message);
@@ -119,6 +140,24 @@ const EditEventPage = () => {
         className="max-w-2xl mx-auto bg-gray-700 p-8 rounded-lg shadow-lg"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="space-y-2">
+            <label className="block text-white font-medium">Event Banner</label>
+            <input
+              type="file"
+              name="banner"
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
+              accept="image/*"
+            />
+            {event.banner && (
+              <img
+                src={`http://localhost:5000${event.banner}`}
+                alt="Current banner"
+                className="mt-2 w-full h-32 object-cover rounded-lg"
+              />
+            )}
+          </div>
+
           <div className="space-y-2">
             <label className="block text-white font-medium">Event Title</label>
             <input
@@ -169,6 +208,13 @@ const EditEventPage = () => {
             required
           />
         </div>
+
+        {/* ✅ Show success message when event is updated */}
+        {successMessage && (
+          <div className="mb-6 p-3 bg-green-500/10 text-green-500 rounded-lg text-center">
+            {successMessage} Redirecting...
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 p-3 bg-red-500/10 text-red-500 rounded-lg">

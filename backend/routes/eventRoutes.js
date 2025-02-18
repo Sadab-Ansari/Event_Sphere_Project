@@ -5,14 +5,16 @@ const {
   getEventById,
   registerForEvent,
   deleteEvent,
+  updateEvent,
 } = require("../controllers/eventController");
+
 const authMiddleware = require("../middleware/authMiddleware");
 const multer = require("multer");
 const path = require("path");
 
 const router = express.Router();
 
-// Configure Multer for Image Uploads
+// ✅ Configure Multer for Image Uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, "../uploads");
@@ -42,31 +44,36 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 }).single("banner");
 
-// Create Event (User can organize events & upload banner)
+// ✅ Create Event (User can organize events & upload banner)
 router.post("/create", authMiddleware, (req, res, next) => {
   upload(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading
-      return res.status(400).json({ error: err.message });
-    } else if (err) {
-      // An unknown error occurred
+    if (err) {
       return res.status(400).json({ error: err.message });
     }
-    // Everything went fine, proceed to createEvent
     createEvent(req, res, next);
   });
 });
 
-// Get All Events (Anyone can access)
+// ✅ Get All Events (Anyone can access)
 router.get("/all", getEvents);
 
-// Get Single Event by ID (Anyone can access)
+// ✅ Get Single Event by ID (Anyone can access)
 router.get("/:eventId", getEventById);
 
-// Register for an Event (Only logged-in users)
+// ✅ Register for an Event (Only logged-in users)
 router.post("/register/:eventId", authMiddleware, registerForEvent);
 
-// Delete an Event (Only the creator or admin can delete)
+// ✅ Fix: Allow Image Uploads in `PUT` Requests
+router.put("/update/:eventId", authMiddleware, (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    updateEvent(req, res, next);
+  });
+});
+
+// ✅ Delete an Event (Only the creator or admin can delete)
 router.delete("/delete/:eventId", authMiddleware, deleteEvent);
 
 module.exports = router;

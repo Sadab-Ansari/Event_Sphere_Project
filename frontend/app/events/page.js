@@ -1,17 +1,18 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { FaEdit, FaTrash } from "react-icons/fa"; // Import icons from React Icons
+import { useSearchParams, useRouter } from "next/navigation";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userId, setUserId] = useState(null); // Track logged-in user
+  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const successMessage = searchParams.get("success");
 
   useEffect(() => {
-    // Fetch events
     fetch("http://localhost:5000/api/events/all")
       .then((res) => res.json())
       .then((data) => {
@@ -19,7 +20,6 @@ const EventsPage = () => {
         setLoading(false);
       });
 
-    // Fetch logged-in user ID
     const token = localStorage.getItem("token");
     if (token) {
       fetch("http://localhost:5000/api/user/profile", {
@@ -66,7 +66,12 @@ const EventsPage = () => {
         Explore Events
       </h1>
 
-      {/* Search Field */}
+      {successMessage && (
+        <div className="mb-6 p-3 bg-green-500/10 text-green-500 rounded-lg text-center">
+          {successMessage}
+        </div>
+      )}
+
       <div className="flex justify-center mb-8">
         <input
           type="text"
@@ -77,7 +82,6 @@ const EventsPage = () => {
         />
       </div>
 
-      {/* Event List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {loading ? (
           <p className="text-center text-gray-400 col-span-full text-xl">
@@ -89,20 +93,42 @@ const EventsPage = () => {
               key={event._id}
               className="bg-gray-700 rounded-2xl shadow-lg overflow-hidden transform hover:scale-105 transition duration-300"
             >
-              {/* Event Banner */}
-              {event.banner ? (
-                <img
-                  src={`http://localhost:5000${event.banner}`}
-                  alt={event.title}
-                  className="w-full h-48 object-cover rounded-t-2xl"
-                />
-              ) : (
-                <div className="w-full h-48 bg-gray-600 flex items-center justify-center text-gray-400 text-lg">
-                  No Image Available
-                </div>
-              )}
+              <div className="relative">
+                {event.banner ? (
+                  <img
+                    src={`http://localhost:5000${event.banner}`}
+                    alt={event.title}
+                    className="w-full h-48 object-cover rounded-t-2xl"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gray-600 flex items-center justify-center text-gray-400 text-lg">
+                    No Image Available
+                  </div>
+                )}
+                {userId === event.organizer && (
+                  <div className="absolute top-2 right-2 flex gap-2 z-50">
+                    <button
+                      onClick={() => router.push(`/edit-event/${event._id}`)}
+                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
+                    >
+                      <FaEdit className="text-gray-800" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(event._id)}
+                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
+                    >
+                      <FaTrash className="text-red-600" />
+                    </button>
+                  </div>
+                )}
+                {console.log(
+                  "Current User ID:",
+                  userId,
+                  "Event Organizer:",
+                  event.organizer
+                )}
+              </div>
 
-              {/* Event Details */}
               <div className="p-6 text-center">
                 <h2 className="text-2xl font-semibold text-white">
                   {event.title}
@@ -116,22 +142,37 @@ const EventsPage = () => {
                 </p>
 
                 {userId === event.organizer && (
-                  <div className="flex gap-2">
+                  <div className="flex justify-center gap-4 mb-4">
                     <button
                       onClick={() => router.push(`/edit-event/${event._id}`)}
-                      className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition flex items-center gap-2"
+                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
                     >
-                      <FaEdit /> Edit
+                      <FaEdit className="text-gray-800" />
                     </button>
                     <button
                       onClick={() => handleDelete(event._id)}
-                      className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition flex items-center gap-2"
+                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
                     >
-                      <FaTrash /> Delete
+                      <FaTrash className="text-red-600" />
                     </button>
                   </div>
                 )}
-                {/* Buttons */}
+                {userId === event.organizer && (
+                  <div className="flex justify-center gap-4 mb-4">
+                    <button
+                      onClick={() => router.push(`/edit-event/${event._id}`)}
+                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
+                    >
+                      <FaEdit className="text-gray-800" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(event._id)}
+                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
+                    >
+                      <FaTrash className="text-red-600" />
+                    </button>
+                  </div>
+                )}
                 <div className="flex flex-col md:flex-row justify-center gap-4 mt-6">
                   <button className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition">
                     View Details
@@ -139,8 +180,6 @@ const EventsPage = () => {
                   <button className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition">
                     Participate
                   </button>
-
-                  {/* Show Edit/Delete Only for Event Creator */}
                 </div>
               </div>
             </div>
