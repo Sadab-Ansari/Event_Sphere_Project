@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaBars, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import { MdEvent } from "react-icons/md"; // Added event icon
+import { MdEvent } from "react-icons/md"; // Event icon
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,103 +41,115 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/30 backdrop-blur-lg shadow-md sticky top-0 w-full z-50">
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
-        {/* Logo */}
-        <Link href="/">
-          <span className="text-2xl font-bold text-blue-600 cursor-pointer">
-            EventHub
-          </span>
-        </Link>
+    <>
+      {/* Main Navbar */}
+      <nav className="bg-transparent backdrop-blur-lg shadow-md sticky top-0 w-full z-50 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link href="/">
+            <span className="text-2xl font-bold text-blue-500 cursor-pointer">
+              EventHub
+            </span>
+          </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-6 text-gray-700">
-          <Link href="/events" className="hover:text-blue-500">
-            Events
-          </Link>
-          <Link href="/about" className="hover:text-blue-500">
-            About
-          </Link>
-          <Link href="/contact" className="hover:text-blue-500">
-            Contact
-          </Link>
+          {/* Desktop Menu */}
+          <div className="hidden md:flex space-x-6 text-white">
+            <Link href="/events" className="hover:text-blue-400 transition">
+              Events
+            </Link>
+            <Link href="/about" className="hover:text-blue-400 transition">
+              About
+            </Link>
+            <Link href="/contact" className="hover:text-blue-400 transition">
+              Contact
+            </Link>
+          </div>
+
+          {/* ✅ Profile Section (Separate from Hamburger) */}
+          <div className="hidden md:flex items-center gap-4 pr-6">
+            {isLoggedIn ? (
+              <>
+                <Link href="/profile">
+                  <FaUserCircle
+                    size={28}
+                    className="text-red-400 cursor-pointer"
+                  />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-blue-400 hover:text-blue-600"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
         </div>
+      </nav>
 
-        {/* Authentication & Hamburger Menu for Desktop */}
-        <div className="hidden md:flex items-center space-x-4 relative">
-          {isLoggedIn ? (
-            <>
-              <Link href="/profile">
-                <FaUserCircle
-                  size={28}
-                  className="text-blue-600 cursor-pointer"
-                />
-              </Link>
+      {/* ✅ Separate Container for Hamburger Icon */}
+      {isLoggedIn && (
+        <div className="fixed top-5 right-8 z-50">
+          <button onClick={toggleDropdown} className="text-black">
+            <FaBars size={26} />
+          </button>
 
-              {/* Hamburger menu for features */}
-              <button onClick={toggleDropdown} className="text-gray-700">
-                <FaBars size={24} />
-              </button>
-
-              {/* Dropdown menu */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 top-12 bg-white shadow-lg rounded-md py-2 w-48">
-                  <Link
-                    href="/organize-event"
-                    className=" px-4 py-2 text-gray-700 hover:bg-gray-200 flex items-center space-x-2"
-                  >
-                    <MdEvent size={20} />
-                    <span>Organize Event</span>
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="text-red-600 hover:text-red-800 ml-5 flex mt-2"
-                  >
-                    <FaSignOutAlt size={20} />
-                    <p className="ml-2">Logout</p>
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="text-blue-600 hover:text-blue-800">
-                Login
-              </Link>
+          {/* ✅ Dropdown Menu - Flush to Right */}
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-3 w-48 bg-gray-900 shadow-lg rounded-md py-2 border border-gray-700">
               <Link
-                href="/signup"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-800"
+                href="/organize-event"
+                className="px-4 py-2 text-white hover:bg-gray-700 flex items-center space-x-2"
               >
-                Sign Up
+                <MdEvent size={20} />
+                <span>Organize Event</span>
               </Link>
-            </>
+              <button
+                onClick={handleLogout}
+                className="text-red-500 hover:text-red-700 ml-5 flex mt-2"
+              >
+                <FaSignOutAlt size={20} />
+                <p className="ml-2">Logout</p>
+              </button>
+            </div>
           )}
         </div>
+      )}
 
-        {/* Mobile Menu Button */}
-        <button className="md:hidden text-gray-700" onClick={toggleMenu}>
+      {/* ✅ Mobile Menu Button */}
+      <div className="md:hidden flex items-center gap-4 fixed top-4 right-4 z-50">
+        <button className="text-white" onClick={toggleMenu}>
           {isMenuOpen ? <IoClose size={28} /> : <FaBars size={28} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* ✅ Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-md py-4 px-6 space-y-4">
+        <div className="md:hidden bg-gray-900/90 backdrop-blur-md shadow-md py-4 px-6 space-y-4 border-t border-gray-700">
           <Link
             href="/events"
-            className="block text-gray-700 hover:text-blue-500"
+            className="block text-white hover:text-blue-400 transition"
           >
             Events
           </Link>
           <Link
             href="/about"
-            className="block text-gray-700 hover:text-blue-500"
+            className="block text-white hover:text-blue-400 transition"
           >
             About
           </Link>
           <Link
             href="/contact"
-            className="block text-gray-700 hover:text-blue-500"
+            className="block text-white hover:text-blue-400 transition"
           >
             Contact
           </Link>
@@ -145,22 +157,22 @@ const Navbar = () => {
             <>
               <Link
                 href="/profile"
-                className="flex items-center space-x-2 text-gray-700 hover:text-blue-500"
+                className="flex items-center space-x-2 text-white hover:text-blue-400 transition"
               >
-                <FaUserCircle size={24} className="text-red-700" />
+                <FaUserCircle size={24} />
                 <span>Profile</span>
               </Link>
               <Link
                 href="/organize-event"
-                className="flex items-center gap-2 text-gray-700 hover:text-blue-500"
+                className="flex items-center gap-2 text-white hover:text-blue-400 transition"
               >
-                <MdEvent size={20} /> {/* Ensure you import the correct icon */}
+                <MdEvent size={20} />
                 <span>Organize Event</span>
               </Link>
 
               <button
                 onClick={handleLogout}
-                className="block w-full text-left text-red-600 hover:text-red-800"
+                className="block w-full text-left text-red-500 hover:text-red-700 transition"
               >
                 Logout
               </button>
@@ -169,13 +181,13 @@ const Navbar = () => {
             <>
               <Link
                 href="/login"
-                className="block text-blue-600 hover:text-blue-800"
+                className="block text-blue-400 hover:text-blue-600 transition"
               >
                 Login
               </Link>
               <Link
                 href="/signup"
-                className="block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-800"
+                className="block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
                 Sign Up
               </Link>
@@ -183,7 +195,7 @@ const Navbar = () => {
           )}
         </div>
       )}
-    </nav>
+    </>
   );
 };
 

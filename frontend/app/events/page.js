@@ -1,13 +1,18 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedInterest, setSelectedInterest] = useState("");
+  const [showParticipationModal, setShowParticipationModal] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const successMessage = searchParams.get("success");
@@ -31,33 +36,42 @@ const EventsPage = () => {
     }
   }, []);
 
-  const handleDelete = async (eventId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this event?"
-    );
-    if (!confirmDelete) return;
+  const handleParticipate = (event) => {
+    setSelectedEvent(event);
+    setShowParticipationModal(true);
+  };
 
+  const confirmParticipation = async () => {
+    if (!selectedEvent) return;
     const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/events/delete/${eventId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (response.ok) {
-        setEvents(events.filter((event) => event._id !== eventId));
-      } else {
-        console.error("Failed to delete event");
+    if (!token) {
+      alert("You must be logged in to participate.");
+      return;
+    }
+
+    const response = await fetch(
+      `http://localhost:5000/api/events/register/${selectedEvent._id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ interest: selectedInterest }),
       }
-    } catch (error) {
-      console.error("Error deleting event:", error);
+    );
+    const data = await response.json();
+    if (response.ok) {
+      alert("Successfully registered for the event!");
+      setShowParticipationModal(false);
+    } else {
+      alert(data.error || "Failed to register.");
     }
   };
 
+  // ✅ Fixed Search Logic
   const filteredEvents = events.filter((event) =>
-    event.title.toLowerCase().includes(searchQuery.toLowerCase())
+    event.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
   );
 
   return (
@@ -66,19 +80,13 @@ const EventsPage = () => {
         Explore Events
       </h1>
 
-      {successMessage && (
-        <div className="mb-6 p-3 bg-green-500/10 text-green-500 rounded-lg text-center">
-          {successMessage}
-        </div>
-      )}
-
       <div className="flex justify-center mb-8">
         <input
           type="text"
           placeholder="Search events..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-lg p-3 border border-gray-600 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white placeholder-gray-400"
+          className="w-full max-w-lg p-3 border border-gray-600 rounded-2xl bg-gray-700 text-white"
         />
       </div>
 
@@ -91,7 +99,7 @@ const EventsPage = () => {
           filteredEvents.map((event) => (
             <div
               key={event._id}
-              className="bg-gray-700 rounded-2xl shadow-lg overflow-hidden transform hover:scale-105 transition duration-300"
+              className="bg-gray-700 rounded-2xl shadow-lg overflow-hidden"
             >
               <div className="relative">
                 {event.banner ? (
@@ -101,34 +109,11 @@ const EventsPage = () => {
                     className="w-full h-48 object-cover rounded-t-2xl"
                   />
                 ) : (
-                  <div className="w-full h-48 bg-gray-600 flex items-center justify-center text-gray-400 text-lg">
+                  <div className="w-full h-48 bg-gray-600 flex items-center justify-center text-gray-400">
                     No Image Available
                   </div>
                 )}
-                {userId === event.organizer && (
-                  <div className="absolute top-2 right-2 flex gap-2 z-50">
-                    <button
-                      onClick={() => router.push(`/edit-event/${event._id}`)}
-                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
-                    >
-                      <FaEdit className="text-gray-800" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(event._id)}
-                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
-                    >
-                      <FaTrash className="text-red-600" />
-                    </button>
-                  </div>
-                )}
-                {console.log(
-                  "Current User ID:",
-                  userId,
-                  "Event Organizer:",
-                  event.organizer
-                )}
               </div>
-
               <div className="p-6 text-center">
                 <h2 className="text-2xl font-semibold text-white">
                   {event.title}
@@ -140,44 +125,14 @@ const EventsPage = () => {
                   <span className="font-medium text-gray-300">Location:</span>{" "}
                   {event.location}
                 </p>
-
-                {userId === event.organizer && (
-                  <div className="flex justify-center gap-4 mb-4">
-                    <button
-                      onClick={() => router.push(`/edit-event/${event._id}`)}
-                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
-                    >
-                      <FaEdit className="text-gray-800" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(event._id)}
-                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
-                    >
-                      <FaTrash className="text-red-600" />
-                    </button>
-                  </div>
-                )}
-                {userId === event.organizer && (
-                  <div className="flex justify-center gap-4 mb-4">
-                    <button
-                      onClick={() => router.push(`/edit-event/${event._id}`)}
-                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
-                    >
-                      <FaEdit className="text-gray-800" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(event._id)}
-                      className="bg-white/80 p-2 rounded-full hover:bg-white transition shadow-lg"
-                    >
-                      <FaTrash className="text-red-600" />
-                    </button>
-                  </div>
-                )}
-                <div className="flex flex-col md:flex-row justify-center gap-4 mt-6">
+                <div className="flex justify-center gap-4 mt-6">
                   <button className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition">
                     View Details
                   </button>
-                  <button className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition">
+                  <button
+                    onClick={() => handleParticipate(event)}
+                    className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition"
+                  >
                     Participate
                   </button>
                 </div>
@@ -186,10 +141,70 @@ const EventsPage = () => {
           ))
         ) : (
           <p className="text-center text-gray-400 col-span-full text-xl">
-            No events found.
+            No matching events found.
           </p>
         )}
       </div>
+
+      {/* Interest Selection Popup */}
+      <AnimatePresence>
+        {showParticipationModal && selectedEvent && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 100 }}
+            className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 z-50"
+          >
+            <div className="bg-gray-800 rounded-lg w-96 p-6 shadow-xl">
+              <h3 className="text-2xl font-bold text-center mb-6 text-white">
+                {selectedEvent.interests.length > 0
+                  ? "Select Your Interest"
+                  : "Confirm Participation"}
+              </h3>
+              {selectedEvent.interests.length > 0 ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {selectedEvent.interests.map((interest, index) => (
+                    <div
+                      key={index}
+                      className={`p-4 rounded-lg cursor-pointer transition-all ${
+                        selectedInterest === interest
+                          ? "bg-green-600 scale-105"
+                          : "bg-gray-700 hover:bg-gray-600"
+                      }`}
+                      onClick={() => setSelectedInterest(interest)}
+                    >
+                      <span className="text-lg font-medium text-white">
+                        {interest.replace(/["[\]]/g, "")}{" "}
+                        {/* ✅ Fix brackets & quotes */}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-gray-400">
+                  Click confirm to participate.
+                </p>
+              )}
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  onClick={() => setShowParticipationModal(false)}
+                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmParticipation}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

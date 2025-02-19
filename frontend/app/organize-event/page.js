@@ -10,11 +10,12 @@ const OrganizeEvent = () => {
     description: "",
     maxParticipants: "",
     banner: null,
+    interests: "", // Kept as a string for input handling
   });
 
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // 🔹 Loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     if (e.target.name === "banner") {
@@ -28,9 +29,9 @@ const OrganizeEvent = () => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
-    setIsLoading(true); // 🔹 Start loading
+    setIsLoading(true);
 
-    const token = localStorage.getItem("token"); // Get token from localStorage
+    const token = localStorage.getItem("token");
     if (!token) {
       setError("You must be logged in to create an event.");
       setIsLoading(false);
@@ -43,13 +44,21 @@ const OrganizeEvent = () => {
     eventData.append("location", formData.location);
     eventData.append("description", formData.description);
     eventData.append("maxParticipants", formData.maxParticipants);
-    eventData.append("banner", formData.banner); // Ensure file is included
+    if (formData.banner) {
+      eventData.append("banner", formData.banner);
+    }
+
+    // ✅ Convert interests to an array before sending
+    eventData.append(
+      "interests",
+      JSON.stringify(formData.interests.split(",").map((i) => i.trim()))
+    );
 
     try {
       const response = await fetch("http://localhost:5000/api/events/create", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` }, // ✅ Ensure token is sent
-        body: eventData, // Don't set Content-Type manually for FormData
+        headers: { Authorization: `Bearer ${token}` },
+        body: eventData,
       });
 
       const data = await response.json();
@@ -62,6 +71,7 @@ const OrganizeEvent = () => {
           description: "",
           maxParticipants: "",
           banner: null,
+          interests: "",
         });
       } else {
         setError(data.message || "Failed to create event");
@@ -70,7 +80,7 @@ const OrganizeEvent = () => {
       console.error("Event creation error:", error);
       setError("An error occurred. Please try again.");
     } finally {
-      setIsLoading(false); // 🔹 Stop loading
+      setIsLoading(false);
     }
   };
 
@@ -80,13 +90,11 @@ const OrganizeEvent = () => {
         Organize Event
       </h1>
 
-      {/* Error & Success Messages */}
       {error && <p className="text-red-500 text-center">{error}</p>}
       {successMessage && (
         <p className="text-green-500 text-center">{successMessage}</p>
       )}
 
-      {/* Organize Event Form */}
       <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
         <input
           type="text"
@@ -130,6 +138,14 @@ const OrganizeEvent = () => {
           onChange={handleChange}
           className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
+        />
+        <input
+          type="text"
+          name="interests"
+          placeholder="Enter interests (comma-separated)"
+          value={formData.interests}
+          onChange={handleChange}
+          className="w-full p-4 bg-gray-800 border border-gray-700 text-white rounded-xl"
         />
         <input
           type="file"

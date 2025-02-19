@@ -12,13 +12,24 @@ const eventSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   }, // Tracks who created the event
-  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Users who joined
+
+  participants: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      interests: { type: [String], default: [] }, // ✅ Store multiple interests per user
+    },
+  ], // Users who joined with multiple interests
+
+  interests: { type: [String], default: [] }, // ✅ Available interests for the event
+
   category: {
     type: String,
     enum: ["Tech", "Sports", "Music", "Business", "Other"],
     default: "Other",
   }, // Optional filtering
+
   capacity: { type: Number, default: 100 }, // Max participants
+
   status: {
     type: String,
     enum: ["Upcoming", "Completed", "Cancelled"],

@@ -5,7 +5,8 @@ const Event = require("../models/eventModel");
 // ✅ Create Event (User Organizes an Event)
 exports.createEvent = async (req, res) => {
   try {
-    const { title, description, date, location, maxParticipants } = req.body;
+    const { title, description, date, location, maxParticipants, interests } =
+      req.body;
 
     // Validate Required Fields
     if (!title || !date || !location) {
@@ -17,6 +18,12 @@ exports.createEvent = async (req, res) => {
     // ✅ Store the uploaded image path
     const banner = req.file ? `/uploads/${req.file.filename}` : null;
 
+    // ✅ Ensure interests are stored as an array
+    const parsedInterests =
+      typeof interests === "string"
+        ? interests.split(",").map((i) => i.trim())
+        : interests || [];
+
     const newEvent = new Event({
       title,
       description,
@@ -25,6 +32,7 @@ exports.createEvent = async (req, res) => {
       maxParticipants: maxParticipants || 100,
       organizer: req.user.id,
       banner,
+      interests: parsedInterests, // ✅ Store available interests
     });
 
     await newEvent.save();
@@ -52,7 +60,7 @@ exports.getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId)
       .populate("organizer", "name email")
-      .populate("participants", "name email");
+      .populate("participants.user", "name email"); // ✅ Populate user details
 
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
@@ -65,22 +73,39 @@ exports.getEventById = async (req, res) => {
   }
 };
 
-// ✅ Register for an Event
+// ✅ Register for an Event with Interest Selection
 exports.registerForEvent = async (req, res) => {
   try {
+    const { interest } = req.body; // Get selected interest
     const event = await Event.findById(req.params.eventId);
+
     if (!event) return res.status(404).json({ error: "Event not found" });
 
-    if (event.participants.includes(req.user.id)) {
+    // Check if user is already registered
+    const isAlreadyRegistered = event.participants.some(
+      (p) => p.user.toString() === req.user.id
+    );
+    if (isAlreadyRegistered) {
       return res
         .status(400)
         .json({ error: "You are already registered for this event." });
     }
 
-    event.participants.push(req.user.id);
+    // If event has interests, ensure user selects a valid one
+    if (
+      event.interests.length > 0 &&
+      (!interest || !event.interests.includes(interest))
+    ) {
+      return res.status(400).json({ error: "Invalid interest selected." });
+    }
+
+    // ✅ Add user with selected interest
+    event.participants.push({ user: req.user.id, interest: interest || null });
     await event.save();
+
     res.status(200).json({ message: "Registered successfully", event });
   } catch (error) {
+    console.error("Error registering for event:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -88,7 +113,8 @@ exports.registerForEvent = async (req, res) => {
 // ✅ Update an Event (Only Organizer)
 exports.updateEvent = async (req, res) => {
   try {
-    const { title, description, date, location, maxParticipants } = req.body;
+    const { title, description, date, location, maxParticipants, interests } =
+      req.body;
 
     // Validate required fields
     if (!title || !date || !location) {
@@ -120,12 +146,16 @@ exports.updateEvent = async (req, res) => {
       event.banner = `/uploads/${req.file.filename}`;
     }
 
-    // ✅ Update event details
+    // ✅ Ensure interests are updated correctly
     event.title = title;
     event.description = description;
     event.date = date;
     event.location = location;
     event.maxParticipants = maxParticipants || event.maxParticipants;
+    event.interests =
+      typeof interests === "string"
+        ? interests.split(",").map((i) => i.trim())
+        : interests || [];
 
     const updatedEvent = await event.save();
     res

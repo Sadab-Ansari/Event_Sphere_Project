@@ -61,9 +61,17 @@ router.get("/all", getEvents);
 router.get("/:eventId", getEventById);
 
 // ✅ Register for an Event (Only logged-in users)
-router.post("/register/:eventId", authMiddleware, registerForEvent);
+router.post("/register/:eventId", authMiddleware, (req, res) => {
+  const { interest } = req.body;
 
-// ✅ Fix: Allow Image Uploads in `PUT` Requests
+  if (!interest) {
+    return res.status(400).json({ error: "Interest selection is required." });
+  }
+
+  registerForEvent(req, res);
+});
+
+// ✅ Allow Image Uploads in `PUT` Requests
 router.put("/update/:eventId", authMiddleware, (req, res, next) => {
   upload(req, res, (err) => {
     if (err) {
