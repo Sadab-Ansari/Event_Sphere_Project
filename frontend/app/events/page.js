@@ -69,7 +69,7 @@ const EventsPage = () => {
     }
   };
 
-  // ✅ Fixed Search Logic
+  // ✅ Search Filter Logic
   const filteredEvents = events.filter((event) =>
     event.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
   );
@@ -97,9 +97,12 @@ const EventsPage = () => {
           </p>
         ) : filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (
-            <div
+            <motion.div
               key={event._id}
               className="bg-gray-700 rounded-2xl shadow-lg overflow-hidden"
+              initial={{ scale: 1 }}
+              whileHover={{ scale: 1.05 }} // ✅ Zoom-out effect on hover
+              transition={{ type: "spring", stiffness: 200, damping: 10 }}
             >
               <div className="relative">
                 {event.banner ? (
@@ -137,7 +140,7 @@ const EventsPage = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))
         ) : (
           <p className="text-center text-gray-400 col-span-full text-xl">
@@ -176,7 +179,6 @@ const EventsPage = () => {
                     >
                       <span className="text-lg font-medium text-white">
                         {interest.replace(/["[\]]/g, "")}{" "}
-                        {/* ✅ Fix brackets & quotes */}
                       </span>
                     </div>
                   ))}

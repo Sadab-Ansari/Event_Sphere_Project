@@ -9,10 +9,11 @@ const ProfileEvent = ({
   type,
   handleDeleteEvent,
   handleWithdraw,
-  handleRemoveParticipant,
+  handleRemoveParticipant, // ✅ Ensure it's received as a prop
 }) => {
   const [isClient, setIsClient] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -20,6 +21,23 @@ const ProfileEvent = ({
   }, []);
 
   if (!isClient) return null;
+
+  const fetchParticipants = async (event) => {
+    setLoadingParticipants(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/events/${event._id}`);
+      const data = await res.json();
+      if (res.ok) {
+        setSelectedEvent(data);
+      } else {
+        console.error("Error fetching participants:", data.error);
+      }
+    } catch (error) {
+      console.error("Error fetching participants:", error);
+    } finally {
+      setLoadingParticipants(false);
+    }
+  };
 
   return (
     <div className="mt-8 text-left max-w-lg w-full">
@@ -70,7 +88,7 @@ const ProfileEvent = ({
                   </button>
                   <button
                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
-                    onClick={() => setSelectedEvent(event)}
+                    onClick={() => fetchParticipants(event)}
                   >
                     View Participants
                   </button>
@@ -108,33 +126,44 @@ const ProfileEvent = ({
             transition={{ duration: 0.3 }}
             className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50"
           >
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96 max-w-full">
+            <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-96 max-w-full">
               <h2 className="text-xl font-bold text-white text-center mb-4">
                 Participants for {selectedEvent.title}
               </h2>
-              {selectedEvent.participants.length > 0 ? (
-                <ul className="space-y-2">
+
+              {loadingParticipants ? (
+                <p className="text-center text-gray-400">Loading...</p>
+              ) : selectedEvent.participants.length > 0 ? (
+                <ul className="space-y-2 max-h-60 overflow-auto">
                   {selectedEvent.participants.map((participant, index) => (
                     <li
                       key={participant.user?._id || index} // ✅ Ensure unique key
-                      className="p-2 bg-gray-700 rounded-md flex justify-between items-center"
+                      className="p-3 bg-gray-700 rounded-md flex justify-between items-center"
                     >
-                      <span className="text-white">
-                        {participant.user?.name || "N/A"} -{" "}
-                        {participant.user?.email || "N/A"} -{" "}
-                        {participant.user?.phone || "N/A"}
-                      </span>
-                      <button
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
-                        onClick={() =>
-                          handleRemoveParticipant(
-                            selectedEvent._id,
-                            participant.user?._id
-                          )
-                        }
-                      >
-                        Remove
-                      </button>
+                      <div className="text-white">
+                        <p className="font-semibold">
+                          {participant.user?.name || "N/A"}
+                        </p>
+                        <p className="text-sm text-gray-300">
+                          📧 {participant.user?.email || "N/A"}
+                        </p>
+                        <p className="text-sm text-gray-300">
+                          📞 {participant.user?.phone || "N/A"}
+                        </p>
+                      </div>
+                      {handleRemoveParticipant && (
+                        <button
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
+                          onClick={() =>
+                            handleRemoveParticipant(
+                              selectedEvent._id,
+                              participant.user?._id
+                            )
+                          }
+                        >
+                          Remove
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>

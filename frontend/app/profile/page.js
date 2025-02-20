@@ -20,7 +20,18 @@ const Profile = () => {
     fetch("http://localhost:5000/api/user/profile", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.status === 401) {
+          // ✅ Token expired or invalid, force logout
+          localStorage.removeItem("token");
+          setUser(null);
+          setFormData({});
+          setOrganizedEvents([]);
+          setParticipatedEvents([]);
+          window.location.href = "/login"; // ✅ Redirect to login
+        }
+        return res.json();
+      })
       .then((data) => {
         if (data) {
           setUser(data.user);
@@ -69,14 +80,13 @@ const Profile = () => {
         }
       );
 
-      const data = await response.json();
-
       if (response.ok) {
         setUser((prevUser) => ({
           ...prevUser,
           profilePic: "",
         }));
       } else {
+        const data = await response.json();
         console.error("Error:", data.message);
       }
     } catch (error) {
@@ -97,8 +107,8 @@ const Profile = () => {
       );
 
       if (response.ok) {
-        setOrganizedEvents(
-          organizedEvents.filter((event) => event._id !== eventId)
+        setOrganizedEvents((prevEvents) =>
+          prevEvents.filter((event) => event._id !== eventId)
         );
       }
     } catch (error) {
@@ -119,8 +129,8 @@ const Profile = () => {
       );
 
       if (response.ok) {
-        setParticipatedEvents(
-          participatedEvents.filter((event) => event._id !== eventId)
+        setParticipatedEvents((prevEvents) =>
+          prevEvents.filter((event) => event._id !== eventId)
         );
       }
     } catch (error) {
@@ -186,8 +196,12 @@ const Profile = () => {
                 </h3>
                 <ul className="space-y-2">
                   {selectedEvent.participants.map((participant) => (
-                    <li key={participant.user._id} className="text-white">
-                      {participant.user.name} - {participant.user.email}
+                    <li
+                      key={participant.user?._id || Math.random()} // ✅ Ensures unique key
+                      className="text-white"
+                    >
+                      {participant.user?.name || "No Name"} -{" "}
+                      {participant.user?.email || "No Email"}
                     </li>
                   ))}
                 </ul>
