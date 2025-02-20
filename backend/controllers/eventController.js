@@ -5,7 +5,7 @@ const User = require("../models/userModel");
 const nodemailer = require("nodemailer");
 
 // ✅ Create Event (User Organizes an Event)
-exports.createEvent = async (req, res) => {
+const createEvent = async (req, res) => {
   try {
     const { title, description, date, location, maxParticipants, interests } =
       req.body;
@@ -45,7 +45,7 @@ exports.createEvent = async (req, res) => {
 };
 
 // ✅ Register for an Event
-exports.registerForEvent = async (req, res) => {
+const registerForEvent = async (req, res) => {
   try {
     const { interest } = req.body;
     const event = await Event.findById(req.params.eventId);
@@ -72,32 +72,6 @@ exports.registerForEvent = async (req, res) => {
     event.participants.push({ user: req.user.id, interest: interest || null });
     await event.save();
 
-    // ✅ Send Confirmation Email
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "Event Participation Confirmation",
-      text: `Hello ${
-        user.name
-      },\n\nYou have successfully registered for the event: ${
-        event.title
-      }.\n\nEvent Details:\n- Date: ${new Date(
-        event.date
-      ).toDateString()}\n- Location: ${
-        event.location
-      }\n\nThank you for participating!`,
-    };
-
-    await transporter.sendMail(mailOptions);
-
     res.status(200).json({ message: "Registered successfully", event });
   } catch (error) {
     console.error("Error registering for event:", error);
@@ -105,52 +79,26 @@ exports.registerForEvent = async (req, res) => {
   }
 };
 
-// ✅ Withdraw from an Event
-exports.withdrawFromEvent = async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.eventId);
-    if (!event) return res.status(404).json({ error: "Event not found" });
-
-    // Find index of the user in participants array
-    const participantIndex = event.participants.findIndex(
-      (p) => p.user.toString() === req.user.id
-    );
-
-    if (participantIndex === -1) {
-      return res
-        .status(400)
-        .json({ error: "You are not registered for this event." });
-    }
-
-    // Remove user from participants list
-    event.participants.splice(participantIndex, 1);
-    await event.save();
-
-    res
-      .status(200)
-      .json({ message: "Successfully withdrawn from event", event });
-  } catch (error) {
-    console.error("Error withdrawing from event:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
 // ✅ Get All Events
-exports.getEvents = async (req, res) => {
+const getEvents = async (req, res) => {
   try {
     const events = await Event.find().populate("organizer", "name email");
     res.status(200).json(events);
   } catch (error) {
+    console.error("Error fetching events:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
 
-// ✅ Get Single Event by ID
-exports.getEventById = async (req, res) => {
+// ✅ Get Single Event by ID with Participant Details
+const getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId)
       .populate("organizer", "name email")
-      .populate("participants.user", "name email");
+      .populate({
+        path: "participants.user",
+        select: "name email phone",
+      });
 
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
@@ -163,8 +111,36 @@ exports.getEventById = async (req, res) => {
   }
 };
 
+// ✅ Withdraw from an Event
+const withdrawFromEvent = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.eventId);
+    if (!event) return res.status(404).json({ error: "Event not found" });
+
+    const participantIndex = event.participants.findIndex(
+      (p) => p.user.toString() === req.user.id
+    );
+
+    if (participantIndex === -1) {
+      return res
+        .status(400)
+        .json({ error: "You are not registered for this event." });
+    }
+
+    event.participants.splice(participantIndex, 1);
+    await event.save();
+
+    res
+      .status(200)
+      .json({ message: "Successfully withdrawn from event", event });
+  } catch (error) {
+    console.error("Error withdrawing from event:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 // ✅ Update an Event (Only Organizer)
-exports.updateEvent = async (req, res) => {
+const updateEvent = async (req, res) => {
   try {
     const { title, description, date, location, maxParticipants, interests } =
       req.body;
@@ -212,7 +188,7 @@ exports.updateEvent = async (req, res) => {
 };
 
 // ✅ Delete an Event (Only Organizer/Admin)
-exports.deleteEvent = async (req, res) => {
+const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId);
     if (!event) return res.status(404).json({ error: "Event not found" });
@@ -221,7 +197,6 @@ exports.deleteEvent = async (req, res) => {
       return res.status(403).json({ error: "Not authorized" });
     }
 
-    // ✅ Delete event banner if it exists
     if (event.banner) {
       const bannerPath = path.join(__dirname, "..", event.banner);
       if (fs.existsSync(bannerPath)) {
@@ -235,4 +210,14 @@ exports.deleteEvent = async (req, res) => {
     console.error("Error deleting event:", error);
     res.status(500).json({ error: "Server error" });
   }
+};
+
+module.exports = {
+  createEvent,
+  registerForEvent,
+  getEvents,
+  getEventById,
+  withdrawFromEvent,
+  updateEvent,
+  deleteEvent,
 };

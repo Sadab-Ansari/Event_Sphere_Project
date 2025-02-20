@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ProfileCard from "./ProfileCard";
 import ProfileEvent from "./ProfileEvent";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -12,6 +13,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [organizedEvents, setOrganizedEvents] = useState([]);
   const [participatedEvents, setParticipatedEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showParticipantsModal, setShowParticipantsModal] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/user/profile", {
@@ -103,7 +106,6 @@ const Profile = () => {
     }
   };
 
-  // ✅ Withdraw from Event Function
   const handleWithdraw = async (eventId) => {
     try {
       const response = await fetch(
@@ -126,6 +128,11 @@ const Profile = () => {
     }
   };
 
+  const handleViewParticipants = (event) => {
+    setSelectedEvent(event);
+    setShowParticipantsModal(true);
+  };
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -137,7 +144,6 @@ const Profile = () => {
   return (
     <ProtectedRoute>
       <div className="flex flex-col items-center min-h-screen bg-gradient-to-r from-blue-500 to-cyan-500 p-6">
-        {/* Profile Card */}
         <ProfileCard
           user={user}
           setUser={setUser}
@@ -149,23 +155,52 @@ const Profile = () => {
           handleRemoveProfilePic={handleRemoveProfilePic}
         />
 
-        {/* Organized Events Section */}
         {organizedEvents.length > 0 && (
           <ProfileEvent
             events={organizedEvents}
             type="organized"
             handleDeleteEvent={handleDeleteEvent}
+            handleViewParticipants={handleViewParticipants}
           />
         )}
 
-        {/* Participated Events Section */}
         {participatedEvents.length > 0 && (
           <ProfileEvent
             events={participatedEvents}
             type="participated"
-            handleWithdraw={handleWithdraw} // ✅ Pass handleWithdraw to ProfileEvent
+            handleWithdraw={handleWithdraw}
           />
         )}
+
+        <AnimatePresence>
+          {showParticipantsModal && selectedEvent && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            >
+              <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+                <h3 className="text-xl font-bold text-white mb-4">
+                  Participants for {selectedEvent.title}
+                </h3>
+                <ul className="space-y-2">
+                  {selectedEvent.participants.map((participant) => (
+                    <li key={participant.user._id} className="text-white">
+                      {participant.user.name} - {participant.user.email}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  onClick={() => setShowParticipantsModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </ProtectedRoute>
   );
