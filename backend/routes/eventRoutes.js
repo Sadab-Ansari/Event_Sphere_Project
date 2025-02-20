@@ -4,6 +4,7 @@ const {
   getEvents,
   getEventById,
   registerForEvent,
+  withdrawFromEvent,
   deleteEvent,
   updateEvent,
 } = require("../controllers/eventController");
@@ -61,15 +62,10 @@ router.get("/all", getEvents);
 router.get("/:eventId", getEventById);
 
 // ✅ Register for an Event (Only logged-in users)
-router.post("/register/:eventId", authMiddleware, (req, res) => {
-  const { interest } = req.body;
+router.post("/register/:eventId", authMiddleware, registerForEvent);
 
-  if (!interest) {
-    return res.status(400).json({ error: "Interest selection is required." });
-  }
-
-  registerForEvent(req, res);
-});
+// ✅ Withdraw from an Event (Only logged-in users)
+router.post("/withdraw/:eventId", authMiddleware, withdrawFromEvent);
 
 // ✅ Allow Image Uploads in `PUT` Requests
 router.put("/update/:eventId", authMiddleware, (req, res, next) => {

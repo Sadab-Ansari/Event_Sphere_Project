@@ -14,10 +14,10 @@ const getUserProfile = async (req, res) => {
     // ✅ Fetch Organized Events
     const organizedEvents = await Event.find({ organizer: req.user.id });
 
-    // ✅ Fetch Participated Events
+    // ✅ Fetch Participated Events (FIXED)
     const participatedEvents = await Event.find({
-      registeredUsers: req.user.id,
-    });
+      "participants.user": req.user.id, // ✅ Correct way to fetch participated events
+    }).populate("organizer", "name email"); // ✅ Populate organizer details
 
     res.status(200).json({
       user,
@@ -54,18 +54,19 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-// ✅ Get User Events (For Participated Events)
+// ✅ Get User's Participated Events (For Profile Page)
 const getUserEvents = async (req, res) => {
   try {
-    const events = await Event.find({ registeredUsers: req.user.id });
+    const events = await Event.find({
+      "participants.user": req.user.id,
+    }).populate("organizer", "name email");
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
-// Remove Profile Picture
-
+// ✅ Remove Profile Picture
 const removeProfilePicture = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);

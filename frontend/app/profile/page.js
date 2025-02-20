@@ -54,7 +54,6 @@ const Profile = () => {
       .catch((err) => console.error("Error updating profile:", err));
   };
 
-  // ✅ Handle Profile Picture Removal (Fixed)
   const handleRemoveProfilePic = async () => {
     try {
       const response = await fetch(
@@ -72,7 +71,7 @@ const Profile = () => {
       if (response.ok) {
         setUser((prevUser) => ({
           ...prevUser,
-          profilePic: "", // ✅ Ensure profilePic is updated in global state
+          profilePic: "",
         }));
       } else {
         console.error("Error:", data.message);
@@ -104,6 +103,29 @@ const Profile = () => {
     }
   };
 
+  // ✅ Withdraw from Event Function
+  const handleWithdraw = async (eventId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/events/withdraw/${eventId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setParticipatedEvents(
+          participatedEvents.filter((event) => event._id !== eventId)
+        );
+      }
+    } catch (error) {
+      console.error("Error withdrawing from event:", error);
+    }
+  };
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -124,10 +146,10 @@ const Profile = () => {
           formData={formData}
           handleChange={handleChange}
           handleSave={handleSave}
-          handleRemoveProfilePic={handleRemoveProfilePic} // ✅ Pass as prop
+          handleRemoveProfilePic={handleRemoveProfilePic}
         />
 
-        {/* Show Organized Events only if user has organized events */}
+        {/* Organized Events Section */}
         {organizedEvents.length > 0 && (
           <ProfileEvent
             events={organizedEvents}
@@ -136,9 +158,13 @@ const Profile = () => {
           />
         )}
 
-        {/* Show Participated Events only if user has participated in events */}
+        {/* Participated Events Section */}
         {participatedEvents.length > 0 && (
-          <ProfileEvent events={participatedEvents} type="participated" />
+          <ProfileEvent
+            events={participatedEvents}
+            type="participated"
+            handleWithdraw={handleWithdraw} // ✅ Pass handleWithdraw to ProfileEvent
+          />
         )}
       </div>
     </ProtectedRoute>

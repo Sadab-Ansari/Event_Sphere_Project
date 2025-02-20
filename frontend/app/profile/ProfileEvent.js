@@ -3,15 +3,19 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const ProfileEvent = ({ events = [], type, handleDeleteEvent }) => {
-  const [isClient, setIsClient] = useState(false); // Track if it's the client-side render
-  const router = useRouter(); // Initialize the useRouter hook from next/navigation
+const ProfileEvent = ({
+  events = [],
+  type,
+  handleDeleteEvent,
+  handleWithdraw,
+}) => {
+  const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    setIsClient(true); // Set to true once component is mounted on client side
+    setIsClient(true);
   }, []);
 
-  // Prevent usage of `useRouter` until component is mounted
   if (!isClient) return null;
 
   return (
@@ -36,7 +40,7 @@ const ProfileEvent = ({ events = [], type, handleDeleteEvent }) => {
                 </p>
               </div>
 
-              {type === "organized" && (
+              {type === "organized" ? (
                 <div className="flex gap-3">
                   <Link
                     href={`/edit-event/${event._id}`}
@@ -62,6 +66,21 @@ const ProfileEvent = ({ events = [], type, handleDeleteEvent }) => {
                     <span>Delete</span>
                   </button>
                 </div>
+              ) : (
+                <button
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to withdraw from this event?"
+                      )
+                    ) {
+                      handleWithdraw(event._id);
+                    }
+                  }}
+                >
+                  Withdraw
+                </button>
               )}
             </li>
           ))}
