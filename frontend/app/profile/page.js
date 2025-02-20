@@ -138,6 +138,37 @@ const Profile = () => {
     }
   };
 
+  const handleRemoveParticipant = async (eventId, userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/events/remove-participant/${eventId}/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setOrganizedEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event._id === eventId
+              ? {
+                  ...event,
+                  participants: event.participants.filter(
+                    (p) => p.user?._id !== userId
+                  ),
+                }
+              : event
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error removing participant:", error);
+    }
+  };
+
   const handleViewParticipants = (event) => {
     setSelectedEvent(event);
     setShowParticipantsModal(true);
@@ -171,6 +202,7 @@ const Profile = () => {
             type="organized"
             handleDeleteEvent={handleDeleteEvent}
             handleViewParticipants={handleViewParticipants}
+            handleRemoveParticipant={handleRemoveParticipant}
           />
         )}
 

@@ -9,7 +9,7 @@ const ProfileEvent = ({
   type,
   handleDeleteEvent,
   handleWithdraw,
-  handleRemoveParticipant, // ✅ Ensure it's received as a prop
+  handleRemoveParticipant,
 }) => {
   const [isClient, setIsClient] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -116,7 +116,6 @@ const ProfileEvent = ({
         <p className="text-gray-400 text-lg">No {type} events found.</p>
       )}
 
-      {/* ✅ Popup for Viewing Participants */}
       <AnimatePresence>
         {selectedEvent && (
           <motion.div
@@ -126,7 +125,7 @@ const ProfileEvent = ({
             transition={{ duration: 0.3 }}
             className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50"
           >
-            <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-96 max-w-full">
+            <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-[600px] max-w-full">
               <h2 className="text-xl font-bold text-white text-center mb-4">
                 Participants for {selectedEvent.title}
               </h2>
@@ -134,10 +133,10 @@ const ProfileEvent = ({
               {loadingParticipants ? (
                 <p className="text-center text-gray-400">Loading...</p>
               ) : selectedEvent.participants.length > 0 ? (
-                <ul className="space-y-2 max-h-60 overflow-auto">
+                <ul className="space-y-2 h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                   {selectedEvent.participants.map((participant, index) => (
                     <li
-                      key={participant.user?._id || index} // ✅ Ensure unique key
+                      key={participant.user?._id || index}
                       className="p-3 bg-gray-700 rounded-md flex justify-between items-center"
                     >
                       <div className="text-white">
@@ -153,7 +152,7 @@ const ProfileEvent = ({
                       </div>
                       {handleRemoveParticipant && (
                         <button
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md transition-colors duration-200"
                           onClick={() =>
                             handleRemoveParticipant(
                               selectedEvent._id,
