@@ -1,61 +1,43 @@
 "use client";
 
-import { useState } from "react";
-
-const AdminPanel = () => {
-  const [menu, setMenu] = useState("dashboard");
-
+const Dashboard = () => {
   return (
-    <div className="container mx-auto px-6 py-10">
-      <h2 className="text-4xl font-bold text-center mb-6">Admin Panel</h2>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-screen p-4 mb-8">
+      {/* Sidebar (Sticky Left) */}
+      <div className="lg:col-span-2 bg-pink-100 text-white p-4 h-full lg:sticky top-0 rounded-lg">
+        Sidebar
+      </div>
 
-      {/* Sidebar Navigation */}
-      <div className="flex flex-col md:flex-row">
-        <aside className="w-full md:w-1/4 bg-gray-200 p-4 rounded-lg">
-          <button
-            onClick={() => setMenu("dashboard")}
-            className="block w-full text-left px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md mb-2"
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setMenu("events")}
-            className="block w-full text-left px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md mb-2"
-          >
-            Manage Events
-          </button>
-          <button
-            onClick={() => setMenu("users")}
-            className="block w-full text-left px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md mb-2"
-          >
-            Manage Users
-          </button>
-          <button
-            onClick={() => setMenu("notifications")}
-            className="block w-full text-left px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-md mb-2"
-          >
-            Notifications
-          </button>
-        </aside>
+      {/* Main Content */}
+      <div className="lg:col-span-10 flex flex-col gap-4">
+        {/* Top Box */}
+        <div className="bg-green-300 p-6 h-12"></div>
 
-        {/* Content Area */}
-        <main className="w-full md:w-3/4 p-6 bg-white rounded-lg shadow-md ml-0 md:ml-6">
-          {menu === "dashboard" && (
-            <p className="text-lg">Welcome to the Admin Dashboard!</p>
-          )}
-          {menu === "events" && (
-            <p className="text-lg">Here you can manage events.</p>
-          )}
-          {menu === "users" && (
-            <p className="text-lg">Manage registered users here.</p>
-          )}
-          {menu === "notifications" && (
-            <p className="text-lg">Send event notifications to users.</p>
-          )}
-        </main>
+        {/* Main Grid with Right Box */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
+          <div className="md:col-span-2 grid gap-4">
+            {/* First Row: Two Equal Boxes */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-red-300 h-60 p-4"></div>
+              <div className="bg-green-300 h-60 p-4"></div>
+            </div>
+
+            {/* Second Row: Third Box (Wider) + Fourth Box */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-yellow-300 h-80 p-4 sm:col-span-2"></div>
+              <div className="bg-purple-300 h-80 p-4"></div>
+            </div>
+          </div>
+
+          {/* Right Box (Hidden on Small, Appears on md and above) */}
+          <div className="bg-blue-300 h-full p-4 hidden md:block"></div>
+        </div>
+
+        {/* Bottom Box */}
+        <div className="bg-gray-400 h-16 p-4"></div>
       </div>
     </div>
   );
 };
 
-export default AdminPanel;
+export default Dashboard;

@@ -53,7 +53,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-6 text-white">
+          <div className="hidden md:flex space-x-6 text-black text-lg">
             <Link href="/events" className="hover:text-blue-400 transition">
               Events
             </Link>

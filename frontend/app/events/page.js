@@ -86,7 +86,7 @@ const EventsPage = () => {
           placeholder="Search events..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-lg p-3 border border-gray-600 rounded-2xl bg-gray-700 text-white"
+          className="w-full max-w-lg p-3 border border-green-900 rounded-2xl bg-gray-700 text-white focus:border-green-900 focus:border-4"
         />
       </div>
 
