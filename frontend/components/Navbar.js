@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaBars, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import { MdEvent } from "react-icons/md"; // Event icon
+import { MdEvent } from "react-icons/md";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,13 +26,8 @@ const Navbar = () => {
     }
   }, []);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -42,14 +37,14 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Main Navbar */}
       <nav className="bg-transparent backdrop-blur-lg shadow-md sticky top-0 w-full z-50 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/">
-            <span className="text-2xl font-bold text-blue-500 cursor-pointer">
-              EventHub
-            </span>
+          <Link
+            href="/"
+            className="text-2xl font-bold text-blue-500 cursor-pointer"
+          >
+            EventHub
           </Link>
 
           {/* Desktop Menu */}
@@ -65,17 +60,15 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* ✅ Profile Section (Separate from Hamburger) */}
+          {/* Profile Section */}
           <div className="hidden md:flex items-center gap-4 pr-6">
             {isLoggedIn ? (
-              <>
-                <Link href="/profile">
-                  <FaUserCircle
-                    size={28}
-                    className="text-red-400 cursor-pointer"
-                  />
-                </Link>
-              </>
+              <Link href="/profile">
+                <FaUserCircle
+                  size={28}
+                  className="text-red-400 cursor-pointer"
+                />
+              </Link>
             ) : (
               <>
                 <Link
@@ -96,43 +89,14 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* ✅ Separate Container for Hamburger Icon */}
-      {isLoggedIn && (
-        <div className="fixed top-5 right-8 z-50">
-          <button onClick={toggleDropdown} className="text-black">
-            <FaBars size={26} />
-          </button>
-
-          {/* ✅ Dropdown Menu - Flush to Right */}
-          {isDropdownOpen && (
-            <div className="absolute right-0 mt-3 w-48 bg-gray-900 shadow-lg rounded-md py-2 border border-gray-700">
-              <Link
-                href="/organize-event"
-                className="px-4 py-2 text-white hover:bg-gray-700 flex items-center space-x-2"
-              >
-                <MdEvent size={20} />
-                <span>Organize Event</span>
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-red-500 hover:text-red-700 ml-5 flex mt-2"
-              >
-                <FaSignOutAlt size={20} />
-                <p className="ml-2">Logout</p>
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ✅ Mobile Menu Button */}
+      {/* Hamburger Icon for Mobile */}
       <div className="md:hidden flex items-center gap-4 fixed top-4 right-4 z-50">
         <button className="text-white" onClick={toggleMenu}>
           {isMenuOpen ? <IoClose size={28} /> : <FaBars size={28} />}
         </button>
       </div>
 
-      {/* ✅ Mobile Menu */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-gray-900/90 backdrop-blur-md shadow-md py-4 px-6 space-y-4 border-t border-gray-700">
           <Link
@@ -169,7 +133,6 @@ const Navbar = () => {
                 <MdEvent size={20} />
                 <span>Organize Event</span>
               </Link>
-
               <button
                 onClick={handleLogout}
                 className="block w-full text-left text-red-500 hover:text-red-700 transition"

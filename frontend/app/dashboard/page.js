@@ -2,6 +2,8 @@
 import Footer1 from "./Footer1";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
+import Calendar from "./Calender";
+import Clock from "./Clock";
 // import Link from "next/link";
 // import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 // import Footer from "@/components/Footer";
@@ -38,7 +40,14 @@ const Dashboard = () => {
           </div>
 
           {/* Right Box (Hidden on Small, Appears on md and above) */}
-          <div className="bg-blue-300 h-full p-4 hidden md:block"></div>
+          <div className="bg-pink-300 h-full p-4 rounded-lg flex justify-between flex-col md:flex">
+            <div>
+              <Calendar />
+            </div>
+            <div>
+              <Clock />
+            </div>
+          </div>
         </div>
 
         {/* Bottom Box */}

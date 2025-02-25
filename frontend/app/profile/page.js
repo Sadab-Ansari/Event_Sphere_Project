@@ -184,7 +184,7 @@ const Profile = () => {
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col items-center min-h-screen bg-gradient-to-r from-blue-500 to-cyan-500 p-6">
+      <div className="flex flex-col items-center min-h-screen bg-gradient-to-r from-gray-100 to-cyan-100 p-6">
         <ProfileCard
           user={user}
           setUser={setUser}
