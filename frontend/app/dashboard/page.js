@@ -57,7 +57,7 @@ const Dashboard = () => {
           </div>
 
           {/* Right Box (Hidden on Small, Appears on md and above) */}
-          <div className="h-full rounded-lg flex justify-between flex-col md:flex">
+          <div className="h-full rounded-lg flex flex-col md:flex space-y-4">
             <div>
               <Calendar />
             </div>
@@ -65,7 +65,7 @@ const Dashboard = () => {
               <Clock />
             </div>
             <div className="relative text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md">
-              <span className="bg-black bg-clip-text text-transparent animate-gradient">
+              <span className="bg-black bg-clip-text text-transparent animate-gradient pb-1">
                 Date & Time
               </span>
             </div>

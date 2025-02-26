@@ -5,9 +5,9 @@ const session = require("express-session");
 const passport = require("passport");
 const path = require("path");
 const connectDB = require("./config/db");
-const eventRoutes = require("./routes/eventRoutes");
 
-dotenv.config(); // ✅ Load environment variables at the top
+// ✅ Load Environment Variables
+dotenv.config();
 
 const app = express();
 
@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ Serve Uploaded Images (Profile & Event Banners)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// ✅ Session Setup
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "your_default_secret",
@@ -27,18 +28,23 @@ app.use(
   })
 );
 
+// ✅ Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
-
 require("./config/passport");
 
 // ✅ Routes
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const eventRoutes = require("./routes/eventRoutes");
+const trafficRoutes = require("./routes/trafficRoutes"); // ✅ Traffic API
+// const progressRoutes = require("./routes/progressRoutes"); // ✅ Progress API
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/traffic", trafficRoutes);
+// app.use("/api/progress", progressRoutes); // ✅ Added Progress API
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
@@ -46,13 +52,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal Server Error" });
 });
 
-// ✅ Ensure MongoDB Connects Before Starting Server
-connectDB()
-  .then(() => {
+// ✅ Start Server After MongoDB Connection
+(async () => {
+  try {
+    await connectDB();
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error("❌ MongoDB Connection Failed:", error);
     process.exit(1);
-  });
+  }
+})();

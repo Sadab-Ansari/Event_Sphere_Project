@@ -1,55 +1,81 @@
-"use client"; // Ensure this is at the top
+"use client";
 
 import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Label } from "recharts";
 
-const data = [
-  { name: "Completed", value: 60 },
-  { name: "Remaining", value: 40 },
-];
-
-const COLORS = ["#007bff", "#d1d5db"];
-
 export default function ProgressPieChart() {
+  const [progress, setProgress] = useState(0);
+  const [remaining, setRemaining] = useState(100);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true); // Set true only on the client
+    setIsClient(true);
+    fetchProgress();
   }, []);
 
-  if (!isClient) return null; // Avoid rendering on the server
+  const fetchProgress = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/progress");
+      const data = await response.json();
+      if (data) {
+        const completed = data.completed || 0;
+        const total = data.total || 100;
+        const progressValue = Math.round((completed / total) * 100);
+        setProgress(progressValue);
+        setRemaining(100 - progressValue);
+      }
+    } catch (error) {
+      console.error("Error fetching progress:", error);
+    }
+  };
+
+  if (!isClient) return null;
+
+  const COLORS = ["url(#purpleGradient)", "#A78BFA"];
 
   return (
-    <div className=" bg-white relative w-64 h-60 flex items-center justify-center rounded-full mt-3 ml-0.5 shadow-2xl">
+    <div className="bg-white relative w-64 h-60 flex items-center justify-center rounded-full mt-3 ml-0.5 shadow-2xl">
+      <svg width="0" height="0">
+        <defs>
+          <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#A855F7" stopOpacity={0.9} />
+            <stop offset="100%" stopColor="#7C3AED" stopOpacity={1} />
+          </linearGradient>
+          <filter id="purpleGlow">
+            <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#A855F7" />
+          </filter>
+        </defs>
+      </svg>
       <PieChart width={280} height={280}>
         <Pie
-          data={data}
+          data={[
+            { name: "Completed", value: progress },
+            { name: "Remaining", value: remaining },
+          ]}
           cx="50%"
           cy="50%"
           innerRadius={82}
           outerRadius={139}
           startAngle={90}
-          endAngle={-270}
+          endAngle={580}
           dataKey="value"
           isAnimationActive={true}
         >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index]} />
-          ))}
+          <Cell fill={COLORS[0]} style={{ filter: "url(#purpleGlow)" }} />
+          <Cell fill={COLORS[1]} />
           <Label
-            value={`${data[0].value}%`}
+            value={`${progress}%`}
             position="center"
             fill="#333"
             style={{ fontSize: "30px", fontWeight: "bold" }}
           />
         </Pie>
       </PieChart>
-
       <div className="absolute top-[7%] right-[2%] bg-white px-4 py-1 text-lg font-bold rounded-full shadow-md">
-        {data[1].value}%
+        {remaining}%
       </div>
       <div className="absolute bottom-[12%] left-[2%] bg-white px-4 py-1 text-lg font-bold rounded-full shadow-md">
-        {data[0].value}%
+        {progress}%
       </div>
     </div>
   );
