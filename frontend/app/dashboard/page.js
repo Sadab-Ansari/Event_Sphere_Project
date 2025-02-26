@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
 import Calendar from "./Calender";
 import Clock from "./Clock";
+import TrafficBarChart from "./TrafficBarChart";
 // import Link from "next/link";
 // import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 // import Footer from "@/components/Footer";
@@ -28,8 +29,12 @@ const Dashboard = () => {
           <div className="md:col-span-2 grid gap-4">
             {/* First Row: Two Equal Boxes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Upcoming events */}
               <div className="bg-red-300 h-60 p-4"></div>
-              <div className="bg-green-300 h-60 p-4"></div>
+              {/*BarChart */}
+              <div className="bg-green-300 h-60 p-4">
+                <TrafficBarChart />
+              </div>
             </div>
 
             {/* Second Row: Third Box (Wider) + Fourth Box */}
@@ -40,12 +45,17 @@ const Dashboard = () => {
           </div>
 
           {/* Right Box (Hidden on Small, Appears on md and above) */}
-          <div className="bg-pink-300 h-full p-4 rounded-lg flex justify-between flex-col md:flex">
+          <div className="h-full rounded-lg flex justify-between flex-col md:flex">
             <div>
               <Calendar />
             </div>
             <div>
               <Clock />
+            </div>
+            <div className="relative text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md">
+              <span className="bg-black bg-clip-text text-transparent animate-gradient">
+                Date & Time
+              </span>
             </div>
           </div>
         </div>

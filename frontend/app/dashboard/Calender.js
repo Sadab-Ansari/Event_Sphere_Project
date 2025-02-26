@@ -13,7 +13,8 @@ import {
   subMonths,
   addMonths,
 } from "date-fns";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+// import { FaChevronRight } from "react-icons/fa";
+import { CiCircleChevLeft, CiCircleChevRight } from "react-icons/ci";
 
 const Calendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -30,17 +31,23 @@ const Calendar = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
+    <div className="max-w-md mx-auto p-4 bg-white shadow-xl rounded-lg">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-          <FaChevronLeft size={20} />
+        <button
+          className="text-slate-300 hover:text-slate-400"
+          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+        >
+          <CiCircleChevLeft size={28} />
         </button>
         <h2 className="text-xl font-bold text-purple-700">
           {format(currentMonth, "MMMM yyyy")}
         </h2>
-        <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-          <FaChevronRight size={20} />
+        <button
+          className="text-slate-300 hover:text-slate-400"
+          onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+        >
+          <CiCircleChevRight size={28} />
         </button>
       </div>
 
@@ -56,9 +63,13 @@ const Calendar = () => {
         {days.map((date, index) => (
           <div
             key={index}
-            className={`p-2 text-center rounded-full ${
+            className={`p-2 text-center rounded-full h-10 w-10 ${
               isSameMonth(date, currentMonth) ? "text-black" : "text-gray-400"
-            } ${isToday(date) ? "bg-green-500 text-white font-bold" : ""}`}
+            } ${
+              isToday(date)
+                ? "bg-gradient-to-tr from-pink-500 to-red-500 text-white font-bold"
+                : ""
+            }`}
           >
             {format(date, "d")}
           </div>

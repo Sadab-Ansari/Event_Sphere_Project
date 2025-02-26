@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import { MdCelebration } from "react-icons/md";
 import { FaSlack } from "react-icons/fa6";
-
+import { AiFillMessage } from "react-icons/ai";
 const Sidebar = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +26,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="h-screen w-60 bg-pink-200 flex-col justify-between p-5 shadow-lg rounded-xl hidden md:flex">
+      <div className="h-screen w-60 bg-white flex-col justify-between p-5 shadow-lg rounded-xl hidden md:flex">
         <div className="space-y-2">
           <Link
             href="/profile"
@@ -58,7 +58,15 @@ const Sidebar = () => {
             <FaCalendarAlt size={24} />
             <span>Events</span>
           </Link>
-
+          <Link
+            href="/messages"
+            className={`flex items-center w-full px-4 py-2 space-x-3 rounded text-xl ${isActive(
+              "/messages"
+            )}`}
+          >
+            <AiFillMessage size={24} />
+            <span>messages</span>
+          </Link>
           <Link
             href="/about"
             className={`flex items-center w-full px-4 py-2 space-x-3 rounded text-xl ${isActive(
