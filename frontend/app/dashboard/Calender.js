@@ -67,7 +67,7 @@ const Calendar = () => {
               isSameMonth(date, currentMonth) ? "text-black" : "text-gray-400"
             } ${
               isToday(date)
-                ? "bg-gradient-to-tr from-pink-500 to-red-500 text-white font-bold"
+                ? "bg-gradient-to-tr from-pink-500 to-red-500 text-white font-bold shadow-lg shadow-red-500/50"
                 : ""
             }`}
           >

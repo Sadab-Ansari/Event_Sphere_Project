@@ -5,6 +5,7 @@ import TopNav from "./TopNav";
 import Calendar from "./Calender";
 import Clock from "./Clock";
 import TrafficBarChart from "./TrafficBarChart";
+import ProgressPieChart from "./ProgessPieChart";
 // import Link from "next/link";
 // import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 // import Footer from "@/components/Footer";
@@ -32,7 +33,7 @@ const Dashboard = () => {
               {/* Upcoming events */}
               <div className="bg-red-300 h-60 p-4"></div>
               {/*BarChart */}
-              <div className="bg-green-300 h-60 p-4">
+              <div className="">
                 <TrafficBarChart />
               </div>
             </div>
@@ -40,7 +41,18 @@ const Dashboard = () => {
             {/* Second Row: Third Box (Wider) + Fourth Box */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-yellow-300 h-80 p-4 sm:col-span-2"></div>
-              <div className="bg-purple-300 h-80 p-4"></div>
+              <div className="h-80 flex justify-between items-center flex-col">
+                <div>
+                  <ProgressPieChart />
+                </div>
+                <div>
+                  <div className="relative text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md w-64">
+                    <span className="bg-black bg-clip-text text-transparent animate-gradient pb-1">
+                      Progress
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
