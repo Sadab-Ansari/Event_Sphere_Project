@@ -7,13 +7,20 @@ const nodemailer = require("nodemailer");
 // ✅ Create Event (User Organizes an Event)
 const createEvent = async (req, res) => {
   try {
-    const { title, description, date, location, maxParticipants, interests } =
-      req.body;
+    const {
+      title,
+      description,
+      date,
+      location,
+      time,
+      maxParticipants,
+      interests,
+    } = req.body;
 
-    if (!title || !date || !location) {
+    if (!title || !date || !location || !time) {
       return res
         .status(400)
-        .json({ error: "Title, date, and location are required!" });
+        .json({ error: "Title, date, location, and time are required!" });
     }
 
     const banner = req.file ? `/uploads/${req.file.filename}` : null;
@@ -24,10 +31,13 @@ const createEvent = async (req, res) => {
         : interests || [];
 
     const newEvent = new Event({
+      time,
+
       title,
       description,
       date,
       location,
+      time,
       maxParticipants: maxParticipants || 100,
       organizer: req.user.id,
       banner,
@@ -142,8 +152,15 @@ const withdrawFromEvent = async (req, res) => {
 // ✅ Update an Event (Only Organizer)
 const updateEvent = async (req, res) => {
   try {
-    const { title, description, date, location, maxParticipants, interests } =
-      req.body;
+    const {
+      title,
+      description,
+      date,
+      location,
+      time,
+      maxParticipants,
+      interests,
+    } = req.body;
 
     const event = await Event.findById(req.params.eventId);
     if (!event) {

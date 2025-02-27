@@ -3,14 +3,11 @@ const {
   getProgress,
   updateProgress,
 } = require("../controllers/progressController");
-const { protect } = require("../middleware/authMiddleware"); // ✅ Ensure only logged-in users access progress
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// ✅ Get Progress
-router.get("/", protect, getProgress);
-
-// ✅ Update Progress
-router.post("/", protect, updateProgress);
+router.get("/", authMiddleware, getProgress);
+router.put("/", authMiddleware, updateProgress);
 
 module.exports = router;

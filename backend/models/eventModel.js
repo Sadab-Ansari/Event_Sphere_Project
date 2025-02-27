@@ -30,6 +30,7 @@ const eventSchema = new mongoose.Schema({
 
   capacity: { type: Number, default: 100 }, // Max participants
 
+  time: { type: String }, // Added time field
   status: {
     type: String,
     enum: ["Upcoming", "Completed", "Cancelled"],

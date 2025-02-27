@@ -31,7 +31,14 @@ const EventsPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
-        .then((data) => setUserId(data.user._id))
+        .then((data) => {
+          if (data.user) {
+            setUserId(data.user._id);
+          } else {
+            console.error("User data is undefined");
+          }
+        })
+
         .catch((error) => console.error("Error fetching user profile:", error));
     }
   }, []);
@@ -122,8 +129,9 @@ const EventsPage = () => {
                   {event.title}
                 </h2>
                 <p className="text-gray-300 text-lg">
-                  {new Date(event.date).toDateString()}
+                  {new Date(event.date).toDateString()} at {event.time}
                 </p>
+
                 <p className="text-gray-400 text-lg">
                   <span className="font-medium text-gray-300">Location:</span>{" "}
                   {event.location}

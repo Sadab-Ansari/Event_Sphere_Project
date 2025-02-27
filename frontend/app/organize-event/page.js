@@ -6,11 +6,13 @@ const OrganizeEvent = () => {
   const [formData, setFormData] = useState({
     title: "",
     date: "",
+    time: "12:00", // Set a default time to avoid uncontrolled input
+    period: "AM", // AM/PM selection
     location: "",
     description: "",
     maxParticipants: "",
     banner: null,
-    interests: "", // Kept as a string for input handling
+    interests: "",
   });
 
   const [error, setError] = useState("");
@@ -38,17 +40,25 @@ const OrganizeEvent = () => {
       return;
     }
 
+    // ✅ Convert 12-hour format to 24-hour format before sending to backend
+    let [hours, minutes] = formData.time.split(":");
+    if (formData.period === "PM" && hours !== "12") {
+      hours = String(parseInt(hours) + 12);
+    } else if (formData.period === "AM" && hours === "12") {
+      hours = "00";
+    }
+    const formattedTime = `${hours}:${minutes}`;
+
     const eventData = new FormData();
     eventData.append("title", formData.title);
     eventData.append("date", formData.date);
+    eventData.append("time", formattedTime); // Send converted time
     eventData.append("location", formData.location);
     eventData.append("description", formData.description);
     eventData.append("maxParticipants", formData.maxParticipants);
     if (formData.banner) {
       eventData.append("banner", formData.banner);
     }
-
-    // ✅ Convert interests to an array before sending
     eventData.append(
       "interests",
       JSON.stringify(formData.interests.split(",").map((i) => i.trim()))
@@ -67,6 +77,8 @@ const OrganizeEvent = () => {
         setFormData({
           title: "",
           date: "",
+          time: "12:00", // Reset to default time
+          period: "AM",
           location: "",
           description: "",
           maxParticipants: "",
@@ -113,6 +125,28 @@ const OrganizeEvent = () => {
           className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+
+        {/* Time Input with AM/PM Selection */}
+        <div className="flex space-x-2">
+          <input
+            type="time"
+            name="time"
+            value={formData.time}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <select
+            name="period"
+            value={formData.period}
+            onChange={handleChange}
+            className="p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+
         <input
           type="text"
           name="location"

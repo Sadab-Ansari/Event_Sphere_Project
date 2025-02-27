@@ -37,14 +37,14 @@ require("./config/passport");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
-const trafficRoutes = require("./routes/trafficRoutes"); // ✅ Traffic API
-// const progressRoutes = require("./routes/progressRoutes"); // ✅ Progress API
+const trafficRoutes = require("./routes/trafficRoutes");
+const progressRoutes = require("./routes/progressRoutes"); // ✅ Ensure this file exists
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/traffic", trafficRoutes);
-// app.use("/api/progress", progressRoutes); // ✅ Added Progress API
+app.use("/api/progress", progressRoutes); // ✅ Include Progress API
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {

@@ -4,14 +4,19 @@ import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Label } from "recharts";
 
 export default function ProgressPieChart() {
-  const [progress, setProgress] = useState(0);
-  const [remaining, setRemaining] = useState(100);
+  const [progress, setProgress] = useState(60); // ✅ Static Default (60% completed)
+  const [remaining, setRemaining] = useState(40);
   const [isClient, setIsClient] = useState(false);
+  const [isDynamic, setIsDynamic] = useState(false); // ✅ Toggle for Dynamic Mode
 
   useEffect(() => {
     setIsClient(true);
-    fetchProgress();
-  }, []);
+
+    // ✅ Remove this condition to fetch real data
+    if (isDynamic) {
+      fetchProgress();
+    }
+  }, [isDynamic]);
 
   const fetchProgress = async () => {
     try {
@@ -71,9 +76,6 @@ export default function ProgressPieChart() {
           />
         </Pie>
       </PieChart>
-      <div className="absolute top-[7%] right-[2%] bg-white px-4 py-1 text-lg font-bold rounded-full shadow-md">
-        {remaining}%
-      </div>
       <div className="absolute bottom-[12%] left-[2%] bg-white px-4 py-1 text-lg font-bold rounded-full shadow-md">
         {progress}%
       </div>
