@@ -13,8 +13,9 @@ const createEvent = async (req, res) => {
       date,
       location,
       time,
-      maxParticipants,
+      capacity,
       interests,
+      category,
     } = req.body;
 
     if (!title || !date || !location || !time) {
@@ -31,17 +32,16 @@ const createEvent = async (req, res) => {
         : interests || [];
 
     const newEvent = new Event({
-      time,
-
       title,
       description,
       date,
       location,
       time,
-      maxParticipants: maxParticipants || 100,
+      capacity: capacity || 100,
       organizer: req.user.id,
       banner,
       interests: parsedInterests,
+      category: category || "Other",
     });
 
     await newEvent.save();
@@ -57,7 +57,7 @@ const createEvent = async (req, res) => {
 // ✅ Register for an Event
 const registerForEvent = async (req, res) => {
   try {
-    const { interest } = req.body;
+    const { interests } = req.body;
     const event = await Event.findById(req.params.eventId);
     const user = await User.findById(req.user.id);
 
@@ -72,14 +72,12 @@ const registerForEvent = async (req, res) => {
         .json({ error: "You are already registered for this event." });
     }
 
-    if (
-      event.interests.length > 0 &&
-      (!interest || !event.interests.includes(interest))
-    ) {
-      return res.status(400).json({ error: "Invalid interest selected." });
-    }
+    const userInterests =
+      typeof interests === "string"
+        ? interests.split(",").map((i) => i.trim())
+        : interests || [];
 
-    event.participants.push({ user: req.user.id, interest: interest || null });
+    event.participants.push({ user: req.user.id, interests: userInterests });
     await event.save();
 
     res.status(200).json({ message: "Registered successfully", event });

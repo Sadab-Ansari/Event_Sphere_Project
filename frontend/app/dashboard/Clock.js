@@ -4,7 +4,7 @@ import { motion } from "framer-motion"; // Import Framer Motion
 
 const Clock = () => {
   const [time, setTime] = useState("");
-  const [is24Hour, setIs24Hour] = useState(true);
+  const [is24Hour, setIs24Hour] = useState(false); // Set 12H as default
   const [meridian, setMeridian] = useState(""); // Store AM/PM separately
 
   useEffect(() => {

@@ -6,6 +6,7 @@ import Calendar from "./Calender";
 import Clock from "./Clock";
 import TrafficBarChart from "./TrafficBarChart";
 import ProgressPieChart from "./ProgessPieChart";
+// import UpcomingEvents from "./UpcomingEvents";
 // import Link from "next/link";
 // import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 // import Footer from "@/components/Footer";
@@ -31,7 +32,9 @@ const Dashboard = () => {
             {/* First Row: Two Equal Boxes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Upcoming events */}
-              <div className="bg-red-300 h-60 p-4"></div>
+              <div className="bg-red-300 h-60 p-4">
+                {/* <UpcomingEvents /> */}
+              </div>
               {/*BarChart */}
               <div className="">
                 <TrafficBarChart />

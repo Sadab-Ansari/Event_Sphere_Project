@@ -56,8 +56,8 @@ const ProfileEvent = ({
                 <p className="text-white font-semibold text-lg">
                   {event.title}
                 </p>
-                <p className="text-gray-400 text-sm">
-                  {new Date(event.date).toDateString()}
+                <p className="text-gray-300 text-lg">
+                  {new Date(event.date).toDateString()} at {event.time}
                 </p>
               </div>
 

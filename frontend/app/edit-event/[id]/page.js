@@ -9,6 +9,8 @@ const EditEventPage = () => {
   const [event, setEvent] = useState({
     title: "",
     date: "",
+    time: "12:00", // Set a default time in 12-hour format
+    period: "AM", // AM/PM selection
     location: "",
     description: "",
     banner: "",
@@ -77,6 +79,7 @@ const EditEventPage = () => {
     formData.append("title", event.title);
     formData.append("description", event.description);
     formData.append("date", event.date);
+    formData.append("time", `${event.time} ${event.period}`); // Send time in 12-hour format
     formData.append("location", event.location);
     formData.append("maxParticipants", event.maxParticipants || 100);
     if (selectedFile) {

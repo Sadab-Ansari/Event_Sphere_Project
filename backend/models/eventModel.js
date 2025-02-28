@@ -30,7 +30,7 @@ const eventSchema = new mongoose.Schema({
 
   capacity: { type: Number, default: 100 }, // Max participants
 
-  time: { type: String }, // Added time field
+  time: { type: String, required: true }, // Ensure time is stored as a string with AM/PM
   status: {
     type: String,
     enum: ["Upcoming", "Completed", "Cancelled"],
