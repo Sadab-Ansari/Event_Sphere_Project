@@ -5,7 +5,7 @@ import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 
 const Footer1 = () => {
   return (
-    <div className="bg-white shadow-lg text-lg px-4 py-2 text-black font-semibold rounded-xl h-auto md:h-16">
+    <div className="bg-white shadow-lg text-lg px-4 py-2 text-black font-semibold rounded-xl h-auto md:h-16 ">
       {/* Desktop Layout (MD and larger) - No Size Change */}
       <div className="hidden md:flex justify-between items-center">
         {/* Left - EventManager */}

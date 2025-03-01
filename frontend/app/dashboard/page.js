@@ -1,4 +1,5 @@
 "use client";
+
 import Footer1 from "./Footer1";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
@@ -6,11 +7,8 @@ import Calendar from "./Calender";
 import Clock from "./Clock";
 import TrafficBarChart from "./TrafficBarChart";
 import ProgressPieChart from "./ProgessPieChart";
-// import UpcomingEvents from "./UpcomingEvents";
-// import Link from "next/link";
-// import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
-// import Footer from "@/components/Footer";
-// import Footer1 from "./Footer1";
+import UpcomingEvents from "./UpcomingEvents";
+
 const Dashboard = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-screen p-4 mb-8">
@@ -31,11 +29,9 @@ const Dashboard = () => {
           <div className="md:col-span-2 grid gap-4">
             {/* First Row: Two Equal Boxes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Upcoming events */}
-              <div className="bg-red-300 h-60 p-4">
-                {/* <UpcomingEvents /> */}
+              <div className="">
+                <UpcomingEvents />
               </div>
-              {/*BarChart */}
               <div className="">
                 <TrafficBarChart />
               </div>
@@ -60,7 +56,7 @@ const Dashboard = () => {
           </div>
 
           {/* Right Box (Hidden on Small, Appears on md and above) */}
-          <div className="h-full rounded-lg flex flex-col md:flex space-y-4">
+          <div className="h-full rounded-lg flex flex-col md:flex justify-between">
             <div>
               <Calendar />
             </div>

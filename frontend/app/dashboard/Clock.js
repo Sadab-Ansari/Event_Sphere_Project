@@ -36,7 +36,7 @@ const Clock = () => {
   const [hour, minute, second] = time.split(":") || ["00", "00", "00"];
 
   return (
-    <div className="flex flex-col items-center justify-center bg-white text-black pt-5 rounded-lg shadow-xl h-44">
+    <div className="flex flex-col items-center justify-center bg-white text-black pt-5 rounded-lg shadow-xl h-36">
       {/* Clock Display */}
       <div className="text-5xl font-mono font-bold mb-8 flex items-center space-x-1">
         <span className="text-red-500 tracking-tight">{hour}</span>
