@@ -158,6 +158,7 @@ const EventsPage = () => {
       </div>
 
       {/* Interest Selection Popup */}
+      {/* Interest Selection Popup */}
       <AnimatePresence>
         {showParticipationModal && selectedEvent && (
           <motion.div
@@ -169,11 +170,12 @@ const EventsPage = () => {
           >
             <div className="bg-gray-800 rounded-lg w-96 p-6 shadow-xl">
               <h3 className="text-2xl font-bold text-center mb-6 text-white">
-                {selectedEvent.interests.length > 0
+                {selectedEvent?.interests?.length > 0
                   ? "Select Your Interest"
                   : "Confirm Participation"}
               </h3>
-              {selectedEvent.interests.length > 0 ? (
+
+              {selectedEvent?.interests?.length > 0 ? (
                 <div className="grid grid-cols-2 gap-4">
                   {selectedEvent.interests.map((interest, index) => (
                     <div
@@ -186,7 +188,7 @@ const EventsPage = () => {
                       onClick={() => setSelectedInterest(interest)}
                     >
                       <span className="text-lg font-medium text-white">
-                        {interest.replace(/["[\]]/g, "")}{" "}
+                        {interest.replace(/["[\]]/g, "")}
                       </span>
                     </div>
                   ))}
@@ -206,7 +208,14 @@ const EventsPage = () => {
                 </button>
                 <button
                   onClick={confirmParticipation}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  disabled={
+                    selectedEvent?.interests?.length > 0 && !selectedInterest
+                  }
+                  className={`px-6 py-2 rounded-lg transition-colors ${
+                    selectedEvent?.interests?.length > 0 && !selectedInterest
+                      ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                      : "bg-green-600 text-white hover:bg-green-700"
+                  }`}
                 >
                   Confirm
                 </button>

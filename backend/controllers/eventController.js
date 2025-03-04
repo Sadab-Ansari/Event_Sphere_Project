@@ -3,6 +3,7 @@ const path = require("path");
 const Event = require("../models/eventModel");
 const User = require("../models/userModel");
 const nodemailer = require("nodemailer");
+const moment = require("moment");
 
 const createEvent = async (req, res) => {
   try {
@@ -16,29 +17,56 @@ const createEvent = async (req, res) => {
       interests,
       category,
     } = req.body;
+
+    // Validate required fields
     if (!title || !date || !location || !time) {
       return res
         .status(400)
         .json({ error: "Title, date, location, and time are required!" });
     }
+
+    // Format the time to 12-hour format
+    const formattedTime = moment(time, "HH:mm").format("hh:mm A");
+
     const banner = req.file ? `/uploads/${req.file.filename}` : null;
-    const parsedInterests =
-      typeof interests === "string"
-        ? interests.split(",").map((i) => i.trim())
-        : interests || [];
+
+    let parsedInterests = [];
+    if (typeof interests === "string") {
+      try {
+        const jsonParsed = JSON.parse(interests);
+        if (Array.isArray(jsonParsed)) {
+          parsedInterests = jsonParsed.filter((i) => i.trim() !== "");
+        } else {
+          parsedInterests = interests
+            .split(",")
+            .map((i) => i.trim())
+            .filter(Boolean);
+        }
+      } catch (error) {
+        parsedInterests = interests
+          .split(",")
+          .map((i) => i.trim())
+          .filter(Boolean);
+      }
+    } else if (Array.isArray(interests)) {
+      parsedInterests = interests.filter((i) => i.trim() !== "");
+    }
+
     const newEvent = new Event({
       title,
       description,
       date,
       location,
-      time,
+      time: formattedTime, // Save the formatted time with AM/PM
       capacity: capacity || 100,
       organizer: req.user.id,
       banner,
-      interests: parsedInterests,
+      ...(parsedInterests.length > 0 ? { interests: parsedInterests } : {}),
       category: category || "Other",
     });
+
     await newEvent.save();
+
     res
       .status(201)
       .json({ message: "Event created successfully", event: newEvent });
@@ -175,22 +203,37 @@ const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId);
     if (!event) return res.status(404).json({ error: "Event not found" });
+
     if (event.organizer.toString() !== req.user.id) {
       return res.status(403).json({ error: "Not authorized" });
     }
+
+    // Remove event reference from participants' registered events
+    await User.updateMany(
+      { registeredEvents: event._id },
+      { $pull: { registeredEvents: event._id } }
+    );
+
+    // Delete event banner if exists
     if (event.banner) {
       const bannerPath = path.join(__dirname, "..", event.banner);
       if (fs.existsSync(bannerPath)) {
         fs.unlinkSync(bannerPath);
       }
     }
-    await event.deleteOne();
-    res.status(200).json({ message: "Event deleted successfully" });
+
+    // Delete the event itself
+    await Event.findByIdAndDelete(req.params.eventId);
+
+    res
+      .status(200)
+      .json({ message: "Event deleted along with participants' records" });
   } catch (error) {
     console.error("Error deleting event:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
+
 const getUpcomingEvents = async (req, res) => {
   try {
     const currentDate = new Date();

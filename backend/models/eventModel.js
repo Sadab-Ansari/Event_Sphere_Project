@@ -20,8 +20,7 @@ const eventSchema = new mongoose.Schema({
     },
   ], // Users who joined with multiple interests
 
-  interests: { type: [String], default: [] }, // ✅ Available interests for the event
-
+  interests: { type: [String], default: undefined },
   category: {
     type: String,
     enum: ["Tech", "Sports", "Music", "Business", "Other"],

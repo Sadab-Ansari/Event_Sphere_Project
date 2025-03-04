@@ -20,10 +20,22 @@ const OrganizeEvent = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
-    if (e.target.name === "banner") {
-      setFormData({ ...formData, banner: e.target.files[0] });
+    const { name, value } = e.target;
+
+    if (name === "time") {
+      // Keep the time value in 24-hour format, but show AM/PM in the state.
+      let [hours, minutes] = value.split(":");
+      if (formData.period === "PM" && hours !== "12") {
+        hours = String(parseInt(hours) + 12);
+      } else if (formData.period === "AM" && hours === "12") {
+        hours = "00";
+      }
+      setFormData({ ...formData, time: `${hours}:${minutes}` });
+    } else if (name === "period") {
+      // Update period separately, but leave the time as is for now.
+      setFormData({ ...formData, period: value });
     } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+      setFormData({ ...formData, [name]: value });
     }
   };
 
@@ -40,7 +52,7 @@ const OrganizeEvent = () => {
       return;
     }
 
-    // ✅ Convert 12-hour format to 24-hour format before sending to backend
+    // Format the time before submission
     let [hours, minutes] = formData.time.split(":");
     if (formData.period === "PM" && hours !== "12") {
       hours = String(parseInt(hours) + 12);
@@ -59,10 +71,12 @@ const OrganizeEvent = () => {
     if (formData.banner) {
       eventData.append("banner", formData.banner);
     }
-    eventData.append(
-      "interests",
-      JSON.stringify(formData.interests.split(",").map((i) => i.trim()))
-    );
+
+    const formattedInterests = formData.interests
+      .split(",")
+      .map((i) => i.trim())
+      .filter((i) => i !== "");
+    eventData.append("interests", JSON.stringify(formattedInterests));
 
     try {
       const response = await fetch("http://localhost:5000/api/events/create", {
@@ -134,7 +148,6 @@ const OrganizeEvent = () => {
             value={formData.time}
             onChange={handleChange}
             className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
           />
           <select
             name="period"
