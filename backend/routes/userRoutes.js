@@ -46,4 +46,5 @@ router.delete(
 // ✅ Get User's Participated Events
 router.get("/profile/events", authMiddleware, userController.getUserEvents);
 
+// router.get("/user", authMiddleware, userController.getUser); // New route for /api/user
 module.exports = router;

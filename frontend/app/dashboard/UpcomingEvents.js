@@ -54,7 +54,7 @@ const UpcomingEvent = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-gray-300 rounded-lg shadow-lg overflow-hidden">
       {/* Event Banner */}
       <div className="relative">
         {nearestEvent.banner ? (

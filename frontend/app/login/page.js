@@ -30,8 +30,10 @@ const Login = () => {
 
       const data = await response.json();
       if (response.ok) {
-        // Store token in localStorage
+        // Store token & userId in localStorage
         localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.user._id); // ✅ FIXED
+
         setSuccessMessage(
           "You have successfully logged in. Redirecting to dashboard..."
         );

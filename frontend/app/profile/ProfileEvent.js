@@ -139,6 +139,12 @@ const ProfileEvent = ({
                       <p className="text-sm text-gray-300">
                         📞 {participant.user?.phone || "N/A"}
                       </p>
+                      <p className="text-sm text-gray-300">
+                        🎯 Interest:{" "}
+                        {participant.interests?.length > 0
+                          ? participant.interests.join(", ")
+                          : "Not specified"}
+                      </p>
                     </div>
                     {handleRemoveParticipant && (
                       <button

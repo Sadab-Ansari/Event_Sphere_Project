@@ -12,7 +12,15 @@ dotenv.config();
 const app = express();
 
 // ✅ Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Allow only your frontend
+    credentials: true, // Allow cookies & sessions
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -39,7 +47,9 @@ const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const trafficRoutes = require("./routes/trafficRoutes");
 const progressRoutes = require("./routes/progressRoutes"); // ✅ Ensure this file exists
+const eventMessageRoutes = require("./routes/eventMessageRoutes");
 
+app.use("/api/messages", eventMessageRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/events", eventRoutes);

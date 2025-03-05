@@ -7,7 +7,7 @@ const {
   withdrawFromEvent,
   deleteEvent,
   updateEvent,
-  getUpcomingEvents, // Import the new method
+  // getUpcomingEvents, // Import the new method
 } = require("../controllers/eventController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -60,7 +60,7 @@ router.post("/create", authMiddleware, (req, res, next) => {
 router.get("/all", getEvents);
 
 // ✅ Get Upcoming Events (Anyone can access)
-router.get("/upcoming", getUpcomingEvents); // Add this route
+// router.get("/upcoming", getUpcomingEvents); // Add this route
 
 // ✅ Get Single Event by ID (Anyone can access)
 router.get("/:eventId", getEventById);

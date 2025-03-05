@@ -7,9 +7,10 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return !this.googleId;
-      }, // Required only for non-Google users
+        return this.googleId ? false : true;
+      },
     },
+
     googleId: { type: String, index: true }, //  Use index instead of unique to avoid conflicts
     phone: { type: String, default: "" },
     profilePic: { type: String, default: "/default-profile.jpg" }, //  Ensure it exists

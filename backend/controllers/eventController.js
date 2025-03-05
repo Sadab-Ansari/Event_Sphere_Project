@@ -117,7 +117,10 @@ const getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId)
       .populate("organizer", "name email")
-      .populate({ path: "participants.user", select: "name email phone" });
+      .populate({
+        path: "participants.user",
+        select: "name email phone intrest",
+      });
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
     }
@@ -234,19 +237,19 @@ const deleteEvent = async (req, res) => {
   }
 };
 
-const getUpcomingEvents = async (req, res) => {
-  try {
-    const currentDate = new Date();
-    const upcomingEvents = await Event.find({ date: { $gte: currentDate } })
-      .populate("organizer", "name email")
-      .sort({ date: 1 }); // Sort by date in ascending order
+// const getUpcomingEvents = async (req, res) => {
+//   try {
+//     const currentDate = new Date();
+//     const upcomingEvents = await Event.find({ date: { $gte: currentDate } })
+//       .populate("organizer", "name email")
+//       .sort({ date: 1 }); // Sort by date in ascending order
 
-    res.status(200).json(upcomingEvents);
-  } catch (error) {
-    console.error("Error fetching upcoming events:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
+//     res.status(200).json(upcomingEvents);
+//   } catch (error) {
+//     console.error("Error fetching upcoming events:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
 
 module.exports = {
   createEvent,
@@ -256,5 +259,5 @@ module.exports = {
   withdrawFromEvent,
   updateEvent,
   deleteEvent,
-  getUpcomingEvents,
+  // getUpcomingEvents,
 };

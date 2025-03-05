@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Footer1 from "./Footer1";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
@@ -7,9 +8,37 @@ import Calendar from "./Calender";
 import Clock from "./Clock";
 import TrafficBarChart from "./TrafficBarChart";
 import ProgressPieChart from "./ProgessPieChart";
-import UpcomingEvents from "./UpcomingEvents";
+// import UpcomingEvents from "./UpcomingEvents";
+// import EventMessages from "./eMessage";
 
 const Dashboard = () => {
+  // const [userId, setUserId] = useState(null);
+
+  // useEffect(() => {
+  //   const fetchUserId = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:5000/api/user", {
+  //         method: "GET",
+  //         credentials: "include", // Needed if using cookies
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
+
+  //       const data = await response.json();
+  //       if (data.userId) {
+  //         setUserId(data.userId);
+  //       } else {
+  //         console.warn("User ID not found in response");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching user ID", error);
+  //     }
+  //   };
+
+  //   fetchUserId();
+  // }, []);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-screen p-4 mb-8">
       {/* Sidebar (Sticky Left) */}
@@ -29,8 +58,8 @@ const Dashboard = () => {
           <div className="md:col-span-2 grid gap-4">
             {/* First Row: Two Equal Boxes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="">
-                <UpcomingEvents />
+              <div className=" bg-pink-400 rounded-lg shadow-lg">
+                {/* <UpcomingEvents /> */}
               </div>
               <div className="">
                 <TrafficBarChart />
@@ -39,7 +68,13 @@ const Dashboard = () => {
 
             {/* Second Row: Third Box (Wider) + Fourth Box */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-yellow-300 h-80 p-4 sm:col-span-2"></div>
+              <div className="bg-gray-400 h-80 p-4 sm:col-span-2 shadow-lg rounded-lg">
+                {/* {userId ? (
+                  <EventMessages userId={userId} />
+                ) : (
+                  <p>Loading user data...</p>
+                )} */}
+              </div>
               <div className="h-80 flex justify-between items-center flex-col">
                 <div>
                   <ProgressPieChart />
