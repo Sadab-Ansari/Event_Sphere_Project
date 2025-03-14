@@ -59,9 +59,9 @@ const Sidebar = () => {
             <span>Events</span>
           </Link>
           <Link
-            href="/messages"
+            href="/chat"
             className={`flex items-center w-full px-4 py-2 space-x-3 rounded text-xl ${isActive(
-              "/messages"
+              "/chat"
             )}`}
           >
             <AiFillMessage size={24} />

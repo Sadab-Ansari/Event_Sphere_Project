@@ -64,7 +64,12 @@ const EventsPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ interest: selectedInterest }),
+        body: JSON.stringify({
+          participant: {
+            user: userId, // Send the logged-in user ID
+            interests: [selectedInterest], // Send selected interest as an array
+          },
+        }),
       }
     );
     const data = await response.json();
