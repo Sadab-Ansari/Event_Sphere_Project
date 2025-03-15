@@ -1,23 +1,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { sendMessage, getMessages } = require("../controllers/chatController");
-const User = require("../models/userModel"); // Import the User model
+const User = require("../models/userModel");
+const Chat = require("../models/chatModel"); // Import Chat model for new routes
 
 const router = express.Router();
 
-// 📌 Middleware to validate MongoDB ObjectIds (Handles both params & body)
+// 📌 Middleware to validate MongoDB ObjectIds
 const validateObjectIds = (req, res, next) => {
   let { senderId, receiverId } = req.method === "POST" ? req.body : req.params;
-
-  console.log("🔍 Validating ObjectIds...");
-  console.log("➡️ Sender ID:", senderId);
-  console.log("➡️ Receiver ID:", receiverId);
 
   if (
     !mongoose.Types.ObjectId.isValid(senderId) ||
     !mongoose.Types.ObjectId.isValid(receiverId)
   ) {
-    console.error("❌ Invalid senderId or receiverId!");
     return res.status(400).json({ error: "Invalid senderId or receiverId" });
   }
   next();
@@ -27,50 +23,74 @@ const validateObjectIds = (req, res, next) => {
 router.get("/getReceiverId/:userId", async (req, res) => {
   const { userId } = req.params;
 
-  console.log("🔍 Fetching receiverId for user:", userId);
-
   if (!mongoose.Types.ObjectId.isValid(userId)) {
-    console.error("❌ Invalid userId format!");
     return res.status(400).json({ error: "Invalid userId format" });
   }
 
   try {
-    // Find any user excluding the current user
     const receiver = await User.findOne({ _id: { $ne: userId } });
+    if (!receiver) return res.status(404).json({ error: "No receiver found" });
 
-    if (!receiver) {
-      console.error("❌ No receiver found!");
-      return res.status(404).json({ error: "No receiver found" });
-    }
-
-    console.log("✅ Receiver found with ID:", receiver._id);
     return res.status(200).json({ receiverId: receiver._id });
   } catch (error) {
-    console.error("❌ Error fetching receiverId:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// 📌 Route to send a message
+// ✅ Route to send a message
 router.post("/send", validateObjectIds, async (req, res, next) => {
   try {
-    console.log("🟢 API Call: POST /send");
-
     const { message } = req.body;
-
     if (!message || typeof message !== "string" || !message.trim()) {
-      console.error("❌ Missing or empty message!");
       return res.status(400).json({ error: "Message cannot be empty" });
     }
 
     await sendMessage(req, res, next);
   } catch (error) {
-    console.error("❌ Error in POST /send:", error);
     next(error);
   }
 });
 
-// 📌 Route to get messages between two users
+// ✅ Route to get messages between two users
 router.get("/:senderId/:receiverId", validateObjectIds, getMessages);
+
+// ✅ NEW: Route to get all conversations for a user
+router.get("/conversations/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid userId format" });
+  }
+
+  try {
+    const conversations = await Chat.aggregate([
+      {
+        $match: {
+          $or: [
+            { senderId: new mongoose.Types.ObjectId(userId) },
+            { receiverId: new mongoose.Types.ObjectId(userId) },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: {
+            senderId: "$senderId",
+            receiverId: "$receiverId",
+          },
+          lastMessage: { $last: "$message" },
+          updatedAt: { $last: "$updatedAt" },
+        },
+      },
+      {
+        $sort: { updatedAt: -1 },
+      },
+    ]);
+
+    res.status(200).json(conversations);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 module.exports = router;

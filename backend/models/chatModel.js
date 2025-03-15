@@ -6,22 +6,26 @@ const chatSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true, // ✅ Indexed for faster queries
+      index: true,
     },
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true, // ✅ Indexed for faster queries
+      index: true,
     },
     message: {
       type: String,
       required: true,
       trim: true,
     },
+    isRead: {
+      type: Boolean,
+      default: false, // ✅ Tracks if the message has been read
+    },
     deleted: {
       type: Boolean,
-      default: false, // ✅ Soft delete feature
+      default: false,
     },
   },
   { timestamps: true }

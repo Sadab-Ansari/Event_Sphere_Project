@@ -1,3 +1,4 @@
+// Socket Configuration
 import { io } from "socket.io-client";
 
 const socket = io("http://localhost:5000", {
@@ -7,17 +8,12 @@ const socket = io("http://localhost:5000", {
   reconnectionAttempts: 5,
 });
 
-// ✅ Debugging connection
-socket.on("connect", () => {
-  console.log("✅ Connected to WebSocket:", socket.id);
-});
-
-socket.on("connect_error", (err) => {
-  console.error("❌ WebSocket connection error:", err.message);
-});
-
-socket.on("disconnect", (reason) => {
-  console.warn("⚠️ Disconnected from WebSocket:", reason);
-});
+socket.on("connect", () => console.log("Connected to WebSocket", socket.id));
+socket.on("connect_error", (err) =>
+  console.error("WebSocket error:", err.message)
+);
+socket.on("disconnect", (reason) =>
+  console.warn("WebSocket disconnected:", reason)
+);
 
 export default socket;

@@ -10,19 +10,21 @@ const setupSocket = (server) => {
     },
   });
 
-  const onlineUsers = new Map(); // Use Map to track userId and socket.id
+  const onlineUsers = new Map(); // Map to track userId and socket.id
 
   io.on("connection", (socket) => {
     console.log(`🔥 User connected: ${socket.id}`);
 
-    // Joining room
+    // ✅ User joins their own room for personal messages
     socket.on("joinRoom", (userId) => {
       if (!mongoose.Types.ObjectId.isValid(userId)) {
         console.error("❌ Invalid userId format");
         return;
       }
 
-      // Prevent duplicate room joins
+      userId = userId.toString();
+
+      // Avoid duplicate room joins
       if (!onlineUsers.has(userId)) {
         onlineUsers.set(userId, socket.id);
         socket.join(userId);
@@ -31,35 +33,37 @@ const setupSocket = (server) => {
       }
     });
 
-    // Sending message
+    // ✅ Handle sending message and emitting it
     socket.on("sendMessage", async (data) => {
       const { senderId, receiverId, message } = data;
 
-      if (!senderId || !receiverId || !message) {
+      if (!senderId || !receiverId || !message || !message.trim()) {
         console.error("❌ Invalid message data");
         return;
       }
 
-      // Save message to database first
-      const newMessage = new Chat({ senderId, receiverId, message });
+      // The message should already be saved via the API, so only emit here
+      const formattedMessage = {
+        senderId,
+        receiverId,
+        message,
+        createdAt: new Date(),
+      };
 
-      try {
-        await newMessage.save();
+      // Emit message to sender and receiver
+      io.to(senderId).emit("receiveMessage", formattedMessage);
+      io.to(receiverId).emit("receiveMessage", formattedMessage);
 
-        // Emit the message to both sender and receiver if they are online
-        if (onlineUsers.has(senderId)) {
-          io.to(senderId).emit("receiveMessage", newMessage);
-        }
-
-        if (onlineUsers.has(receiverId)) {
-          io.to(receiverId).emit("receiveMessage", newMessage);
-        }
-      } catch (error) {
-        console.error("❌ Error saving message to DB:", error.message);
+      // Emit a notification if the receiver is online but not in the chat room
+      if (onlineUsers.has(receiverId)) {
+        io.to(receiverId).emit("newMessageNotification", {
+          senderId,
+          message: "You have a new message!",
+        });
       }
     });
 
-    // Disconnecting and cleaning up
+    // ✅ Handle user disconnection
     socket.on("disconnect", () => {
       for (const [userId, id] of onlineUsers.entries()) {
         if (id === socket.id) {
