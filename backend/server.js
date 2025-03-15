@@ -13,8 +13,9 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app); // HTTP server for Express & Socket.IO
 
-// ✅ Initialize Socket.IO
+// ✅ Initialize Socket.IO and attach to app
 const io = setupSocket(server);
+app.set("io", io); // Attach io instance to app for global access
 
 // ✅ Middleware
 app.use(

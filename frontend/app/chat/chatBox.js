@@ -73,8 +73,10 @@ export default function ChatBox({ userId, receiverId, onBack }) {
 
       if (!response.ok) throw new Error("Failed to send message");
 
-      socket.emit("sendMessage", messageData);
-      setMessages((prev) => [...prev, messageData]);
+      const savedMessage = await response.json();
+
+      socket.emit("sendMessage", savedMessage);
+      setMessages((prev) => [...prev, savedMessage]);
       setMessage("");
     } catch (error) {
       console.error("❌ Error sending message:", error.message);

@@ -10,6 +10,8 @@ const setupSocket = (server) => {
     },
   });
 
+  const onlineUsers = new Set(); // Track unique online users
+
   io.on("connection", (socket) => {
     console.log(`🔥 User connected: ${socket.id}`);
 
@@ -19,8 +21,8 @@ const setupSocket = (server) => {
         return;
       }
       socket.join(userId);
-      console.log(`✅ User ${userId} joined room`);
-      io.emit("updateOnlineUsers", Array.from(io.sockets.adapter.rooms.keys()));
+      onlineUsers.add(userId);
+      io.emit("updateOnlineUsers", Array.from(onlineUsers));
     });
 
     socket.on("sendMessage", async (data) => {
@@ -33,8 +35,8 @@ const setupSocket = (server) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(`❌ User disconnected: ${socket.id}`);
-      io.emit("updateOnlineUsers", Array.from(io.sockets.adapter.rooms.keys()));
+      onlineUsers.delete(socket.id);
+      io.emit("updateOnlineUsers", Array.from(onlineUsers));
     });
   });
 

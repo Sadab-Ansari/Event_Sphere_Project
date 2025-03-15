@@ -33,8 +33,12 @@ const sendMessage = async (req, res) => {
     console.log("✅ Message saved successfully:", newMessage);
 
     // 🔹 Emit message to sender and receiver
-    io.to(receiverId.toString()).emit("receiveMessage", newMessage);
-    io.to(senderId.toString()).emit("receiveMessage", newMessage);
+    if (io) {
+      io.to(receiverId.toString()).emit("receiveMessage", newMessage);
+      io.to(senderId.toString()).emit("receiveMessage", newMessage);
+    } else {
+      console.error("❌ io instance is undefined");
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {
