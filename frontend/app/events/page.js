@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaComments } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
 const EventsPage = () => {
@@ -80,8 +80,14 @@ const EventsPage = () => {
       alert(data.error || "Failed to register.");
     }
   };
+  const handleChat = (organizer) => {
+    if (!userId) {
+      alert("You must be logged in to start a chat.");
+      return;
+    }
+    router.push(`/chat/${organizer._id}`);
+  };
 
-  // ✅ Search Filter Logic
   const filteredEvents = events.filter((event) =>
     event.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
   );
@@ -142,12 +148,15 @@ const EventsPage = () => {
                   {event.location}
                 </p>
                 <div className="flex justify-center gap-4 mt-6">
-                  <button className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition">
-                    View Details
+                  <button
+                    onClick={() => handleChat(event.organizer)}
+                    className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition flex items-center gap-2"
+                  >
+                    <FaComments /> Chat
                   </button>
                   <button
                     onClick={() => handleParticipate(event)}
-                    className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition"
+                    className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition"
                   >
                     Participate
                   </button>

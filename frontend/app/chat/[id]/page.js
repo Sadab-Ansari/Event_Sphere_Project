@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import socket from "./socket"; // Correct path to socket.js
-import ChatBox from "./chatBox";
+import socket from "../socket"; // Correct path to socket.js
+import ChatBox from "../chatBox";
 
 export default function ChatPage() {
   const [userId, setUserId] = useState(null);
@@ -37,38 +37,36 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (userId) {
+      // Join the user's room
       socket.emit("joinRoom", userId);
 
-      socket.on("receiveMessage", (newMessage) => {
+      // Define handler functions to ensure proper cleanup
+      const handleReceiveMessage = (newMessage) => {
         setMessages((prev) => [...prev, newMessage]);
-      });
+      };
 
-      socket.on("updateOnlineUsers", (users) => {
+      const handleUpdateOnlineUsers = (users) => {
         setOnlineUsers(users);
-      });
+      };
 
-      socket.on("userTyping", ({ senderId }) => {
+      const handleUserTyping = ({ senderId }) => {
         setTypingUser(senderId);
         setTimeout(() => setTypingUser(null), 3000);
-      });
+      };
 
+      // Attach listeners
+      socket.on("receiveMessage", handleReceiveMessage);
+      socket.on("updateOnlineUsers", handleUpdateOnlineUsers);
+      socket.on("userTyping", handleUserTyping);
+
+      // Cleanup listeners on component unmount or dependency change
       return () => {
-        socket.off("receiveMessage");
-        socket.off("updateOnlineUsers");
-        socket.off("userTyping");
+        socket.off("receiveMessage", handleReceiveMessage);
+        socket.off("updateOnlineUsers", handleUpdateOnlineUsers);
+        socket.off("userTyping", handleUserTyping);
       };
     }
   }, [userId]);
-
-  const sendMessage = (message) => {
-    if (!userId || !receiverId) {
-      console.error("❌ Missing userId or receiverId");
-      return;
-    }
-
-    const messageData = { senderId: userId, receiverId, message };
-    socket.emit("sendMessage", messageData);
-  };
 
   return (
     <div className="max-w-lg mx-auto mt-10 border rounded-lg shadow-lg bg-white">
@@ -79,7 +77,7 @@ export default function ChatPage() {
           <ChatBox
             userId={userId}
             receiverId={receiverId}
-            sendMessage={sendMessage}
+            messages={messages} // Pass messages to ChatBox
           />
           {typingUser && (
             <p className="text-center text-sm text-gray-500">

@@ -10,16 +10,12 @@ export default function ChatBox({ userId, receiverId, onBack }) {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    if (!userId) {
-      console.error("❌ ChatBox did not receive userId.");
+    if (!userId || !receiverId) {
+      console.error("❌ Missing userId or receiverId");
       return;
     }
 
-    if (!receiverId) {
-      console.warn("⏳ Waiting for receiverId...");
-      return;
-    }
-
+    // Fetch previous messages when component mounts
     const fetchMessages = async () => {
       try {
         const response = await fetch(
@@ -36,6 +32,7 @@ export default function ChatBox({ userId, receiverId, onBack }) {
 
     fetchMessages();
 
+    // Handle incoming messages
     const handleReceiveMessage = (newMessage) => {
       setMessages((prev) => [...prev, newMessage]);
     };
@@ -73,10 +70,7 @@ export default function ChatBox({ userId, receiverId, onBack }) {
 
       if (!response.ok) throw new Error("Failed to send message");
 
-      const savedMessage = await response.json();
-
-      socket.emit("sendMessage", savedMessage);
-      setMessages((prev) => [...prev, savedMessage]);
+      // Clear the input field
       setMessage("");
     } catch (error) {
       console.error("❌ Error sending message:", error.message);
