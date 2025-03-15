@@ -6,19 +6,25 @@ const chatSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true, // ✅ Indexed for faster queries
     },
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true, // ✅ Indexed for faster queries
     },
     message: {
       type: String,
       required: true,
       trim: true,
     },
+    deleted: {
+      type: Boolean,
+      default: false, // ✅ Soft delete feature
+    },
   },
-  { timestamps: true } // `createdAt` and `updatedAt` are automatically added
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Chat", chatSchema);

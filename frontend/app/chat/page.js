@@ -1,90 +1,73 @@
 "use client";
 import { useState, useEffect } from "react";
-import io from "socket.io-client";
-import ChatBox from "./chatBox"; // Import ChatBox
-
-const socket = io("http://localhost:5000"); // Backend URL
+import socket from "./socket"; // Correct path to socket.js
+import ChatBox from "./chatBox";
 
 export default function ChatPage() {
   const [userId, setUserId] = useState(null);
   const [receiverId, setReceiverId] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [typingUser, setTypingUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      console.log("🔹 Checking localStorage for userId...");
-      const storedUserId = localStorage.getItem("userId");
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId && storedUserId !== "null") {
+      setUserId(storedUserId);
 
-      if (storedUserId && storedUserId !== "null") {
-        try {
-          // Only parse if storedUserId is a valid JSON object
-          setUserId(
-            storedUserId.startsWith("{")
-              ? JSON.parse(storedUserId)
-              : storedUserId
-          );
-          console.log("✅ Found userId:", storedUserId);
-        } catch (error) {
-          console.error("❌ Error parsing userId from localStorage:", error);
-          setUserId(null);
-        }
-      } else {
-        console.warn("⚠️ No userId found in localStorage!");
-      }
-
-      // 🔹 Fetch receiverId dynamically
-      fetch("http://localhost:5000/api/getReceiverId") // Replace with actual API endpoint
-        .then((res) => res.json())
+      fetch(`http://localhost:5000/api/chat/getReceiverId/${storedUserId}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch receiverId");
+          return res.json();
+        })
         .then((data) => {
           if (data.receiverId) {
             setReceiverId(data.receiverId);
-          } else {
-            console.warn("⚠️ No receiverId found!");
           }
         })
-        .catch((err) => console.error("❌ Error fetching receiverId:", err))
-        .finally(() => setLoading(false)); // Mark loading as false
+        .catch((err) => {
+          console.error("❌ Error fetching receiverId:", err);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (userId && receiverId) {
+    if (userId) {
+      socket.emit("joinRoom", userId);
+
       socket.on("receiveMessage", (newMessage) => {
         setMessages((prev) => [...prev, newMessage]);
       });
 
+      socket.on("updateOnlineUsers", (users) => {
+        setOnlineUsers(users);
+      });
+
+      socket.on("userTyping", ({ senderId }) => {
+        setTypingUser(senderId);
+        setTimeout(() => setTypingUser(null), 3000);
+      });
+
       return () => {
         socket.off("receiveMessage");
+        socket.off("updateOnlineUsers");
+        socket.off("userTyping");
       };
     }
-  }, [userId, receiverId]);
+  }, [userId]);
 
   const sendMessage = (message) => {
     if (!userId || !receiverId) {
-      console.error("❌ Cannot send message: Missing userId or receiverId");
+      console.error("❌ Missing userId or receiverId");
       return;
     }
 
     const messageData = { senderId: userId, receiverId, message };
-
-    console.log("📤 Sending message:", messageData); // Debugging
-
-    fetch("http://localhost:5000/api/chat/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(messageData),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          console.error("❌ Error sending message:", data.error);
-        } else {
-          console.log("✅ Message sent successfully:", data);
-          setMessages((prev) => [...prev, messageData]);
-        }
-      })
-      .catch((err) => console.error("❌ Failed to send message:", err));
+    socket.emit("sendMessage", messageData);
   };
 
   return (
@@ -92,11 +75,21 @@ export default function ChatPage() {
       {loading ? (
         <p className="text-center p-4">Loading chat...</p>
       ) : userId && receiverId ? (
-        <ChatBox
-          userId={userId}
-          receiverId={receiverId}
-          sendMessage={sendMessage}
-        />
+        <>
+          <ChatBox
+            userId={userId}
+            receiverId={receiverId}
+            sendMessage={sendMessage}
+          />
+          {typingUser && (
+            <p className="text-center text-sm text-gray-500">
+              ✍️ User {typingUser} is typing...
+            </p>
+          )}
+          <p className="text-center text-sm text-gray-500">
+            Online Users: {onlineUsers.length}
+          </p>
+        </>
       ) : (
         <p className="text-center p-4 text-red-500">⚠️ Unable to load chat.</p>
       )}

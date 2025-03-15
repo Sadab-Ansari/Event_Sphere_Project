@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 const Chat = require("../models/chatModel");
 
 // Send a message
-const sendMessage = async (req, res, io) => {
+const sendMessage = async (req, res) => {
   try {
     let { senderId, receiverId, message } = req.body;
+    const io = req.app.get("io"); // ✅ Get io instance from app
 
     console.log("🟢 Received API Call: sendMessage");
     console.log("➡️ Sender ID:", senderId);
@@ -12,7 +13,7 @@ const sendMessage = async (req, res, io) => {
     console.log("➡️ Message:", message);
 
     // Validate required fields
-    if (!senderId || !receiverId || !message) {
+    if (!senderId || !receiverId || !message.trim()) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -27,17 +28,11 @@ const sendMessage = async (req, res, io) => {
     senderId = new mongoose.Types.ObjectId(senderId);
     receiverId = new mongoose.Types.ObjectId(receiverId);
 
-    if (!message.trim()) {
-      return res.status(400).json({ error: "Message cannot be empty" });
-    }
-
     // Save message to DB
-    const newMessage = new Chat({ senderId, receiverId, message });
-    await newMessage.save();
-
+    const newMessage = await new Chat({ senderId, receiverId, message }).save();
     console.log("✅ Message saved successfully:", newMessage);
 
-    // Emit message to both users
+    // 🔹 Emit message to sender and receiver
     io.to(receiverId.toString()).emit("receiveMessage", newMessage);
     io.to(senderId.toString()).emit("receiveMessage", newMessage);
 
@@ -70,12 +65,16 @@ const getMessages = async (req, res) => {
       return res.status(400).json({ error: "Invalid senderId or receiverId" });
     }
 
+    // 🔹 Fetch messages & populate sender/receiver info
     const messages = await Chat.find({
       $or: [
         { senderId, receiverId },
         { senderId: receiverId, receiverId: senderId },
       ],
-    }).sort({ createdAt: 1 });
+    })
+      .populate("senderId", "name") // Optional: Get sender name
+      .populate("receiverId", "name")
+      .sort({ createdAt: 1 });
 
     console.log("✅ Messages fetched successfully:", messages.length);
     res.status(200).json(messages);
