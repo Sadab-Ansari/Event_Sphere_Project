@@ -10,12 +10,11 @@ const setupSocket = (server) => {
     },
   });
 
-  const onlineUsers = new Map(); // Map to track userId and socket.id
+  const onlineUsers = new Map(); // Track userId and socket.id
 
   io.on("connection", (socket) => {
     console.log(`🔥 User connected: ${socket.id}`);
 
-    // ✅ User joins their own room for personal messages
     socket.on("joinRoom", (userId) => {
       if (!mongoose.Types.ObjectId.isValid(userId)) {
         console.error("❌ Invalid userId format");
@@ -24,7 +23,6 @@ const setupSocket = (server) => {
 
       userId = userId.toString();
 
-      // Avoid duplicate room joins
       if (!onlineUsers.has(userId)) {
         onlineUsers.set(userId, socket.id);
         socket.join(userId);
@@ -33,7 +31,6 @@ const setupSocket = (server) => {
       }
     });
 
-    // ✅ Handle sending message and emitting it
     socket.on("sendMessage", async (data) => {
       const { senderId, receiverId, message } = data;
 
@@ -42,28 +39,24 @@ const setupSocket = (server) => {
         return;
       }
 
-      // The message should already be saved via the API, so only emit here
-      const formattedMessage = {
-        senderId,
-        receiverId,
-        message,
-        createdAt: new Date(),
-      };
-
-      // Emit message to sender and receiver
-      io.to(senderId).emit("receiveMessage", formattedMessage);
-      io.to(receiverId).emit("receiveMessage", formattedMessage);
-
-      // Emit a notification if the receiver is online but not in the chat room
-      if (onlineUsers.has(receiverId)) {
-        io.to(receiverId).emit("newMessageNotification", {
+      try {
+        const savedMessage = await Chat.create({
           senderId,
-          message: "You have a new message!",
+          receiverId,
+          message,
+          createdAt: new Date(),
         });
+
+        // Emit to receiver and sender after saving
+        io.to(receiverId).emit("receiveMessage", savedMessage);
+        io.to(senderId).emit("receiveMessage", savedMessage);
+
+        console.log(`📨 Message sent from ${senderId} to ${receiverId}`);
+      } catch (error) {
+        console.error("❌ Error saving message:", error);
       }
     });
 
-    // ✅ Handle user disconnection
     socket.on("disconnect", () => {
       for (const [userId, id] of onlineUsers.entries()) {
         if (id === socket.id) {

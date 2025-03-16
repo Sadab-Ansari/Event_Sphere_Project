@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const { sendMessage, getMessages } = require("../controllers/chatController");
 const User = require("../models/userModel");
-const Chat = require("../models/chatModel"); // Import Chat model for new routes
+const Chat = require("../models/chatModel");
 
 const router = express.Router();
 
@@ -54,7 +54,7 @@ router.post("/send", validateObjectIds, async (req, res, next) => {
 // ✅ Route to get messages between two users
 router.get("/:senderId/:receiverId", validateObjectIds, getMessages);
 
-// ✅ NEW: Route to get all conversations for a user
+// ✅ Route to get all conversations for a user with populated user details
 router.get("/conversations/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -87,8 +87,28 @@ router.get("/conversations/:userId", async (req, res) => {
       },
     ]);
 
-    res.status(200).json(conversations);
+    // Populate sender and receiver details for better frontend display
+    const populatedConversations = await Promise.all(
+      conversations.map(async (conv) => {
+        const sender = await User.findById(conv._id.senderId).select(
+          "name email"
+        );
+        const receiver = await User.findById(conv._id.receiverId).select(
+          "name email"
+        );
+
+        return {
+          sender,
+          receiver,
+          lastMessage: conv.lastMessage,
+          updatedAt: conv.updatedAt,
+        };
+      })
+    );
+
+    res.status(200).json(populatedConversations);
   } catch (error) {
+    console.error("❌ Error in conversations route:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

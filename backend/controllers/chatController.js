@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const Chat = require("../models/chatModel");
+const User = require("../models/userModel"); // Import User model
 
-// Send a message
+// ✅ Send a message
 const sendMessage = async (req, res) => {
   try {
     const { senderId, receiverId, message } = req.body;
@@ -20,6 +21,18 @@ const sendMessage = async (req, res) => {
       !mongoose.Types.ObjectId.isValid(receiverId)
     ) {
       return res.status(400).json({ error: "Invalid senderId or receiverId" });
+    }
+
+    // Validate sender and receiver existence
+    const [senderExists, receiverExists] = await Promise.all([
+      User.exists({ _id: senderId }),
+      User.exists({ _id: receiverId }),
+    ]);
+
+    if (!senderExists || !receiverExists) {
+      return res
+        .status(404)
+        .json({ error: "Sender or Receiver does not exist" });
     }
 
     // Save message to DB
@@ -48,7 +61,7 @@ const sendMessage = async (req, res) => {
   }
 };
 
-// Get messages between two users
+// ✅ Get messages between two users
 const getMessages = async (req, res) => {
   try {
     const { senderId, receiverId } = req.params;
@@ -68,7 +81,7 @@ const getMessages = async (req, res) => {
       return res.status(400).json({ error: "Invalid senderId or receiverId" });
     }
 
-    // Fetch messages without populating sender/receiver
+    // Fetch messages sorted by creation time
     const messages = await Chat.find({
       $or: [
         { senderId, receiverId },

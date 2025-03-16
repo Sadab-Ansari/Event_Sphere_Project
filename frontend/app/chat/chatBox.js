@@ -29,7 +29,13 @@ export default function ChatBox({ userId, receiverId }) {
     fetchMessages();
 
     const handleReceiveMessage = (newMessage) => {
-      setMessages((prev) => [...prev, newMessage]);
+      if (
+        (newMessage.senderId === userId &&
+          newMessage.receiverId === receiverId) ||
+        (newMessage.senderId === receiverId && newMessage.receiverId === userId)
+      ) {
+        setMessages((prev) => [...prev, newMessage]);
+      }
     };
 
     socket.on("receiveMessage", handleReceiveMessage);
@@ -59,7 +65,8 @@ export default function ChatBox({ userId, receiverId }) {
         body: JSON.stringify(messageData),
       });
 
-      setMessage(""); // Clear the input after sending
+      setMessage(""); // Clear input after sending
+      // Do not emit message from here - let the server handle it after saving
     } catch (error) {
       console.error("Error sending message:", error.message);
     }
@@ -79,7 +86,7 @@ export default function ChatBox({ userId, receiverId }) {
         ) : (
           messages.map((msg, index) => {
             const isSender =
-              msg.senderId._id === userId || msg.senderId === userId;
+              msg.senderId === userId || msg.senderId?._id === userId;
             const messageTime = msg.createdAt
               ? format(new Date(msg.createdAt), "HH:mm")
               : "";
