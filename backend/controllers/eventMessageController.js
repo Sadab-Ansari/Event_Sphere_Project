@@ -2,10 +2,11 @@ const EventMessage = require("../models/eventMessageModel");
 const User = require("../models/userModel");
 const Event = require("../models/eventModel");
 
-// ✅ Controller to create an event message
+// ✅ Controller to create an event message & emit it in real-time
 const createEventMessage = async (req, res) => {
   try {
-    const { userId, eventId } = req.body;
+    let { userId, eventId } = req.body;
+    const io = req.app.get("io"); // ✅ Get the socket instance from Express
 
     if (!userId || !eventId) {
       return res
@@ -13,7 +14,20 @@ const createEventMessage = async (req, res) => {
         .json({ success: false, error: "User ID and Event ID are required." });
     }
 
-    // Fetch user and event details
+    // ✅ Convert to ObjectId if it's not already (to match database format)
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(eventId)
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Invalid User ID or Event ID format." });
+    }
+
+    userId = new mongoose.Types.ObjectId(userId);
+    eventId = new mongoose.Types.ObjectId(eventId);
+
+    // ✅ Check if user & event exist
     const user = await User.findById(userId);
     const event = await Event.findById(eventId);
 
@@ -23,19 +37,27 @@ const createEventMessage = async (req, res) => {
         .json({ success: false, error: "User or Event not found." });
     }
 
-    // Create message dynamically
     const message = `${user.name} created the event "${event.title}"`;
 
-    // Save event message
     const newMessage = new EventMessage({
-      user: userId,
-      event: eventId,
+      userId,
+      eventId,
       message,
     });
 
     await newMessage.save();
 
     console.log("✅ Event message created:", newMessage);
+
+    // ✅ Emit the real-time message to all connected clients
+    io.emit("newEventMessage", {
+      _id: newMessage._id,
+      message: newMessage.message,
+      timestamp: newMessage.timestamp,
+      user: { name: user.name },
+      event: { title: event.title },
+    });
+
     res.status(201).json({
       success: true,
       message: "Event message created successfully.",
@@ -58,20 +80,18 @@ const getUserEventMessages = async (req, res) => {
         .json({ success: false, error: "User ID is required." });
     }
 
-    // Fetch messages and populate user & event details
-    const messages = await EventMessage.find({ user: userId })
-      .populate("user", "name") // Get username only
-      .populate("event", "title") // Get event title only
-      .sort({ timestamp: -1 }) // Latest messages first
-      .lean(); // Optimize performance
+    // ✅ Corrected field names and optimized query
+    const messages = await EventMessage.find({ userId: userId }) // No need for ObjectId
+      .populate("userId", "name")
+      .populate("eventId", "title")
+      .sort({ timestamp: -1 })
+      .lean();
 
     if (!messages.length) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "No event messages found for this user.",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "No event messages found for this user.",
+      });
     }
 
     console.log(

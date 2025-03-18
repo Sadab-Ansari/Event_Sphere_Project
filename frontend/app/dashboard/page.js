@@ -8,72 +8,80 @@ import Calendar from "./Calender";
 import Clock from "./Clock";
 import TrafficBarChart from "./TrafficBarChart";
 import ProgressPieChart from "./ProgessPieChart";
-// import UpcomingEvents from "./UpcomingEvents";
-// import EventMessages from "./eMessage";
+import EventMessages from "./eMessage";
 
 const Dashboard = () => {
-  // const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchUserId = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:5000/api/user", {
-  //         method: "GET",
-  //         credentials: "include", // Needed if using cookies
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const token = localStorage.getItem("token"); // ✅ Get the token
 
-  //       const data = await response.json();
-  //       if (data.userId) {
-  //         setUserId(data.userId);
-  //       } else {
-  //         console.warn("User ID not found in response");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching user ID", error);
-  //     }
-  //   };
+      if (!token) {
+        console.error("❌ No token found in localStorage");
+        return;
+      }
 
-  //   fetchUserId();
-  // }, []);
+      try {
+        const response = await fetch("http://localhost:5000/api/user", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // ✅ Ensure token is included
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("🔍 API Response:", data);
+
+        if (data._id) {
+          setUserId(data._id);
+        } else {
+          console.warn("⚠️ User ID not found in response");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching user ID:", error);
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-screen p-4 mb-8">
-      {/* Sidebar (Sticky Left) */}
       <div className="lg:col-span-2">
         <Sidebar />
       </div>
 
-      {/* Main Content */}
       <div className="lg:col-span-10 flex flex-col gap-4">
-        {/* Top Box */}
-        <div className="">
+        <div>
           <TopNav />
         </div>
 
-        {/* Main Grid with Right Box */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
           <div className="md:col-span-2 grid gap-4">
-            {/* First Row: Two Equal Boxes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className=" bg-pink-400 rounded-lg shadow-lg">
-                {/* <UpcomingEvents /> */}
-              </div>
-              <div className="">
+              <div className=" bg-pink-400 rounded-lg shadow-lg"></div>
+              <div>
                 <TrafficBarChart />
               </div>
             </div>
 
-            {/* Second Row: Third Box (Wider) + Fourth Box */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-gray-400 h-80 p-4 sm:col-span-2 shadow-lg rounded-lg">
-                {/* {userId ? (
-                  <EventMessages userId={userId} />
+                {userId ? (
+                  <>
+                    <p className="text-green-600">✅ userId Found: {userId}</p>{" "}
+                    {/* Debugging line */}
+                    <EventMessages userId={userId} />
+                  </>
                 ) : (
-                  <p>Loading user data...</p>
-                )} */}
+                  <p className="text-red-500">Loading user data...</p>
+                )}
               </div>
               <div className="h-80 flex justify-between items-center flex-col">
                 <div>
@@ -90,7 +98,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Right Box (Hidden on Small, Appears on md and above) */}
           <div className="h-full rounded-lg flex flex-col md:flex justify-between">
             <div>
               <Calendar />
@@ -106,8 +113,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Bottom Box */}
-        <div className="">
+        <div>
           <Footer1 />
         </div>
       </div>

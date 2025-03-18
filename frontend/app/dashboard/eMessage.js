@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import io from "socket.io-client";
+
+const socket = io("http://localhost:5000");
 
 const EventMessages = ({ userId }) => {
   const [messages, setMessages] = useState([]);
@@ -17,13 +20,11 @@ const EventMessages = ({ userId }) => {
     }
 
     const fetchMessages = async () => {
-      setLoading(true);
-      setMessages([]);
-      setError(null);
+      console.log("📌 Fetching messages for userId:", userId);
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/eventMessage/messages/user/${userId}` // ✅ Fixed route name
+          `http://localhost:5000/api/eventMessage/user/${userId}`
         );
 
         if (!response.ok) {
@@ -42,6 +43,15 @@ const EventMessages = ({ userId }) => {
     };
 
     fetchMessages();
+
+    socket.on("newEventMessage", (newMessage) => {
+      console.log("📩 New real-time message received:", newMessage);
+      setMessages((prevMessages) => [newMessage, ...prevMessages]);
+    });
+
+    return () => {
+      socket.off("newEventMessage");
+    };
   }, [userId]);
 
   return (
@@ -57,7 +67,15 @@ const EventMessages = ({ userId }) => {
         <ul className="space-y-2">
           {messages.map((msg) => (
             <li key={msg._id} className="bg-white p-3 rounded shadow">
-              <p className="font-medium">{msg.message}</p>
+              <p className="font-medium">
+                <span className="text-blue-600 font-semibold">
+                  {msg.user?.name || "Unknown User"}
+                </span>{" "}
+                created the event{" "}
+                <span className="text-green-600 font-semibold">
+                  "{msg.event?.title || "Unknown Event"}"
+                </span>
+              </p>
               <span className="text-gray-500 text-sm">
                 ({new Date(msg.timestamp).toLocaleString()})
               </span>
