@@ -46,40 +46,55 @@ const EventMessages = () => {
   }, []); // This ensures the effect runs only once when the component mounts
 
   return (
-    <div className="bg-gray-100 p-2 rounded-lg shadow-md w-full mx-auto h-full">
-      <h2 className="text-xl font-semibold mb-3">Event Messages</h2>
+    <>
+      <div className="rounded-lg pl-1 shadow-md w-full mx-auto h-full">
+        <h2 className="text-lg font-semibold ml-3">Event Messages</h2>
 
-      {loading && <p>Loading messages...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+        {loading && <p>Loading messages...</p>}
+        {error && <p className="text-red-500">{error}</p>}
 
-      {!loading && !error && messages.length === 0 && <p>No messages found.</p>}
-
-      <div className="h-60 overflow-y-auto">
-        {/* Scrollable container with fixed height */}
-        {!loading && !error && messages.length > 0 && (
-          <ul className="space-y-1">
-            {messages.map((msg) => (
-              <li key={msg._id} className="bg-white p-3 rounded shadow">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium flex-1">
-                    {/* Make the message clickable */}
-                    <Link
-                      href={`/events`} // Navigate to the event page using the event ID
-                      className="text-blue-600 font-semibold hover:underline"
-                    >
-                      {msg.message || "No message available"}
-                    </Link>
-                  </p>
-                  <span className="text-gray-500 text-sm">
-                    ({new Date(msg.timestamp).toLocaleString()})
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
+        {!loading && !error && messages.length === 0 && (
+          <p>No messages found.</p>
         )}
+
+        <div className="h-72 overflow-auto">
+          {/* Scrollable container with hidden scrollbar */}
+          {!loading && !error && messages.length > 0 && (
+            <ul className="space-y-1">
+              {messages.map((msg) => (
+                <li key={msg._id} className="bg-white p-3 rounded shadow">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium flex-1">
+                      {/* Make the message clickable */}
+                      <Link
+                        href={`/events`} // Navigate to the event page using the event ID
+                        className="text-blue-600 font-semibold hover:underline"
+                      >
+                        {msg.message || "No message available"}
+                      </Link>
+                    </p>
+                    <span className="text-gray-500 text-sm">
+                      ({new Date(msg.timestamp).toLocaleString()})
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
+
+      <style jsx>{`
+        .overflow-auto::-webkit-scrollbar {
+          display: none; /* Hides the scrollbar */
+        }
+
+        .overflow-auto {
+          -ms-overflow-style: none; /* For IE and Edge */
+          scrollbar-width: none; /* For Firefox */
+        }
+      `}</style>
+    </>
   );
 };
 

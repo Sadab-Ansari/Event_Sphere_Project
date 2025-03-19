@@ -99,6 +99,7 @@ const registerForEvent = async (req, res) => {
     const { interests } = req.body;
     const event = await Event.findById(req.params.eventId);
     const user = await User.findById(req.user.id);
+
     if (!event) return res.status(404).json({ error: "Event not found" });
 
     const isAlreadyRegistered = event.participants.some(
@@ -110,12 +111,34 @@ const registerForEvent = async (req, res) => {
         .json({ error: "You are already registered for this event." });
     }
 
+    // Handle interests
     const userInterests =
       typeof interests === "string"
         ? interests.split(",").map((i) => i.trim())
         : interests || [];
+
+    // Add the user to the participants list
     event.participants.push({ user: req.user.id, interests: userInterests });
     await event.save();
+
+    // Create a message when the user participates in the event
+    const message = `${user.name} participated in the event "${event.title}"`;
+    const newEventMessage = new EventMessage({
+      userId: req.user.id,
+      eventId: event._id,
+      message,
+    });
+    await newEventMessage.save();
+
+    // Optionally, emit the event message (if using Socket.io for real-time updates)
+    const io = req.app.get("io");
+    io.emit("newEventMessage", {
+      _id: newEventMessage._id,
+      message: newEventMessage.message,
+      timestamp: newEventMessage.timestamp,
+      user: { name: user.name },
+      event: { title: event.title },
+    });
 
     res.status(200).json({ message: "Registered successfully", event });
   } catch (error) {

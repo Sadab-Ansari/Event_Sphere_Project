@@ -8,13 +8,16 @@ const createEventMessage = async (req, res) => {
   try {
     console.log("📩 Incoming request body:", req.body); // ✅ Debugging log
 
-    let { userId, eventId } = req.body;
+    let { userId, eventId, actionType } = req.body; // Accept actionType
     const io = req.app.get("io"); // ✅ Get the socket instance from Express
 
-    if (!userId || !eventId) {
+    if (!userId || !eventId || !actionType) {
       return res
         .status(400)
-        .json({ success: false, error: "User ID and Event ID are required." });
+        .json({
+          success: false,
+          error: "User ID, Event ID, and Action Type are required.",
+        });
     }
 
     // ✅ Convert to ObjectId if needed
@@ -43,7 +46,20 @@ const createEventMessage = async (req, res) => {
         .json({ success: false, error: "Event not found." });
     }
 
-    const message = `${user.name} created the event "${event.title}"`;
+    // ✅ Construct message based on actionType
+    let message;
+    if (actionType === "create") {
+      message = `${user.name} created the event "${event.title}"`;
+    } else if (actionType === "participate") {
+      message = `${user.name} participated in the event "${event.title}"`;
+    } else {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Invalid actionType. Must be 'create' or 'participate'.",
+        });
+    }
 
     // ✅ Create and save the event message
     const newMessage = new EventMessage({ userId, eventId, message });
