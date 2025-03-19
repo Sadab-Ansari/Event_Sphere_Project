@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const Event = require("../models/eventModel");
 const User = require("../models/userModel");
+const EventMessage = require("../models/eventMessageModel");
 const nodemailer = require("nodemailer");
 const moment = require("moment");
 
@@ -18,16 +19,13 @@ const createEvent = async (req, res) => {
       category,
     } = req.body;
 
-    // Validate required fields
     if (!title || !date || !location || !time) {
       return res
         .status(400)
         .json({ error: "Title, date, location, and time are required!" });
     }
 
-    // Format the time to 12-hour format
     const formattedTime = moment(time, "HH:mm").format("hh:mm A");
-
     const banner = req.file ? `/uploads/${req.file.filename}` : null;
 
     let parsedInterests = [];
@@ -57,7 +55,7 @@ const createEvent = async (req, res) => {
       description,
       date,
       location,
-      time: formattedTime, // Save the formatted time with AM/PM
+      time: formattedTime,
       capacity: capacity || 100,
       organizer: req.user.id,
       banner,
@@ -66,6 +64,26 @@ const createEvent = async (req, res) => {
     });
 
     await newEvent.save();
+
+    // ✅ Create EventMessage when an event is created
+    const message = `${req.user.name} created the event "${newEvent.title}"`;
+    const eventMessage = new EventMessage({
+      userId: req.user.id,
+      eventId: newEvent._id,
+      message,
+    });
+
+    await eventMessage.save();
+
+    // ✅ Emit real-time event message
+    const io = req.app.get("io");
+    io.emit("newEventMessage", {
+      _id: eventMessage._id,
+      message: eventMessage.message,
+      timestamp: eventMessage.timestamp,
+      user: { name: req.user.name },
+      event: { title: newEvent.title },
+    });
 
     res
       .status(201)
@@ -82,6 +100,7 @@ const registerForEvent = async (req, res) => {
     const event = await Event.findById(req.params.eventId);
     const user = await User.findById(req.user.id);
     if (!event) return res.status(404).json({ error: "Event not found" });
+
     const isAlreadyRegistered = event.participants.some(
       (p) => p.user.toString() === req.user.id
     );
@@ -90,12 +109,14 @@ const registerForEvent = async (req, res) => {
         .status(400)
         .json({ error: "You are already registered for this event." });
     }
+
     const userInterests =
       typeof interests === "string"
         ? interests.split(",").map((i) => i.trim())
         : interests || [];
     event.participants.push({ user: req.user.id, interests: userInterests });
     await event.save();
+
     res.status(200).json({ message: "Registered successfully", event });
   } catch (error) {
     console.error("Error registering for event:", error);
@@ -121,6 +142,7 @@ const getEventById = async (req, res) => {
         path: "participants.user",
         select: "name email phone intrest",
       });
+
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
     }
@@ -135,16 +157,20 @@ const withdrawFromEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId);
     if (!event) return res.status(404).json({ error: "Event not found" });
+
     const participantIndex = event.participants.findIndex(
       (p) => p.user.toString() === req.user.id
     );
+
     if (participantIndex === -1) {
       return res
         .status(400)
         .json({ error: "You are not registered for this event." });
     }
+
     event.participants.splice(participantIndex, 1);
     await event.save();
+
     res
       .status(200)
       .json({ message: "Successfully withdrawn from event", event });
@@ -193,6 +219,7 @@ const updateEvent = async (req, res) => {
         ? interests.split(",").map((i) => i.trim())
         : interests || [];
     const updatedEvent = await event.save();
+
     res
       .status(200)
       .json({ message: "Event updated successfully", event: updatedEvent });
@@ -211,22 +238,7 @@ const deleteEvent = async (req, res) => {
       return res.status(403).json({ error: "Not authorized" });
     }
 
-    // Remove event reference from participants' registered events
-    await User.updateMany(
-      { registeredEvents: event._id },
-      { $pull: { registeredEvents: event._id } }
-    );
-
-    // Delete event banner if exists
-    if (event.banner) {
-      const bannerPath = path.join(__dirname, "..", event.banner);
-      if (fs.existsSync(bannerPath)) {
-        fs.unlinkSync(bannerPath);
-      }
-    }
-
-    // Delete the event itself
-    await Event.findByIdAndDelete(req.params.eventId);
+    await event.deleteOne();
 
     res
       .status(200)
@@ -237,20 +249,6 @@ const deleteEvent = async (req, res) => {
   }
 };
 
-// const getUpcomingEvents = async (req, res) => {
-//   try {
-//     const currentDate = new Date();
-//     const upcomingEvents = await Event.find({ date: { $gte: currentDate } })
-//       .populate("organizer", "name email")
-//       .sort({ date: 1 }); // Sort by date in ascending order
-
-//     res.status(200).json(upcomingEvents);
-//   } catch (error) {
-//     console.error("Error fetching upcoming events:", error);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
-
 module.exports = {
   createEvent,
   registerForEvent,
@@ -259,5 +257,4 @@ module.exports = {
   withdrawFromEvent,
   updateEvent,
   deleteEvent,
-  // getUpcomingEvents,
 };
