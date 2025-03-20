@@ -7,7 +7,8 @@ const path = require("path");
 const http = require("http");
 const connectDB = require("./config/db");
 const setupSocket = require("./socket/chatSocket"); // ✅ Modular Socket.IO setup
-const setupEventMessagesSocket = require("./socket/eventMessageSocket"); // ✅ Import event messages socket
+const setupEventMessagesSocket = require("./socket/eventMessageSocket"); // ✅ Event messages socket
+const setupCountdownSocket = require("./socket/countdownSocket"); // ✅ Countdown socket
 
 dotenv.config();
 
@@ -16,7 +17,8 @@ const server = http.createServer(app); // HTTP server for Express & Socket.IO
 
 // ✅ Initialize Socket.IO and attach to app
 const io = setupSocket(server);
-setupEventMessagesSocket(io); // ✅ Add event messages socket setup
+setupEventMessagesSocket(io); // ✅ Setup event messages socket
+setupCountdownSocket(io); // ✅ Setup countdown socket
 app.set("io", io); // Attach io instance to app for global access
 
 // ✅ Middleware
@@ -61,10 +63,10 @@ const eventMessageRoutes = require("./routes/eventMessageRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
 app.use("/api/chat", chatRoutes);
-app.use("/api/eventMessage", eventMessageRoutes); // ✅ Updated route to match frontend
+app.use("/api/eventMessage", eventMessageRoutes); // ✅ Updated event message route
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/events", eventRoutes);
+app.use("/api/events", eventRoutes); // ✅ Handles nearest event route
 app.use("/api/traffic", trafficRoutes);
 app.use("/api/progress", progressRoutes);
 

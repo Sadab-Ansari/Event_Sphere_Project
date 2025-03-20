@@ -272,6 +272,51 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const getNearestEventForUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const events = await Event.find({ "participants.user": userId });
+
+    if (!events.length) {
+      console.log("No upcoming events found for user:", userId);
+      return res.status(404).json({ error: "No upcoming events found." });
+    }
+
+    const upcomingEvents = events
+      .map((event) => {
+        const eventDateTime = new Date(event.date);
+        const [time, period] = event.time.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+
+        if (period === "PM" && hours !== 12) hours += 12;
+        if (period === "AM" && hours === 12) hours = 0;
+
+        eventDateTime.setHours(hours, minutes, 0, 0);
+
+        return {
+          ...event.toObject(),
+          eventDateTime,
+          banner:
+            event.banner && event.banner.trim() !== ""
+              ? `http://localhost:5000${event.banner}`
+              : `http://localhost:5000/assets/default-placeholder.png`, // Set a valid default banner
+        };
+      })
+      .filter((event) => event.eventDateTime > new Date())
+      .sort((a, b) => a.eventDateTime - b.eventDateTime);
+
+    if (!upcomingEvents.length) {
+      console.log("No future events found.");
+      return res.status(404).json({ error: "No upcoming events found." });
+    }
+
+    res.status(200).json(upcomingEvents[0]);
+  } catch (error) {
+    console.error("Error fetching nearest event:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 module.exports = {
   createEvent,
   registerForEvent,
@@ -280,4 +325,5 @@ module.exports = {
   withdrawFromEvent,
   updateEvent,
   deleteEvent,
+  getNearestEventForUser,
 };

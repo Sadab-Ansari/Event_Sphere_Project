@@ -1,82 +1,117 @@
-// import { useState, useEffect } from "react";
+"use client";
+import { useState, useEffect } from "react";
 
-// const UpcomingEvent = () => {
-//   const [nearestEvent, setNearestEvent] = useState(null);
-//   const [loading, setLoading] = useState(true);
+const UpcomingEvent = () => {
+  const [nearestEvent, setNearestEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [countdown, setCountdown] = useState(null);
+  const [bannerExists, setBannerExists] = useState(true); // Track banner existence
 
-//   useEffect(() => {
-//     const fetchNearestEvent = async () => {
-//       try {
-//         // Fetch all events where the user is a participant
-//         const res = await fetch("http://localhost:5000/api/events/upcoming", {
-//           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//         });
-//         if (!res.ok) {
-//           throw new Error("Failed to fetch events");
-//         }
-//         const events = await res.json();
+  useEffect(() => {
+    const fetchNearestEvent = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/events/nearest", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
 
-//         // Get the logged-in user's ID from the token
-//         const token = localStorage.getItem("token");
-//         const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode the token
-//         const userId = decodedToken.userId; // Assuming the user ID is stored in `userId`
+        if (!res.ok) {
+          throw new Error("Failed to fetch nearest event");
+        }
 
-//         // Filter events where the user is a participant
-//         const userEvents = events.filter((event) =>
-//           event.participants.some(
-//             (participant) => participant.user.toString() === userId
-//           )
-//         );
+        const event = await res.json();
+        console.log("Fetched Event:", event); // Debugging log
+        setNearestEvent(event);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-//         // Sort events by date to find the nearest one
-//         const sortedEvents = userEvents.sort(
-//           (a, b) => new Date(a.date) - new Date(b.date)
-//         );
+    fetchNearestEvent();
+  }, []);
 
-//         // Set the nearest event
-//         setNearestEvent(sortedEvents[0]);
-//       } catch (error) {
-//         console.error("Error fetching nearest event:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
+  useEffect(() => {
+    if (!nearestEvent) return;
 
-//     fetchNearestEvent();
-//   }, []);
+    const eventDateTime = new Date(nearestEvent.date);
+    const [time, period] = nearestEvent.time.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
 
-//   if (loading) {
-//     return <p className="text-center">Loading upcoming event...</p>;
-//   }
+    if (period === "PM" && hours !== 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
 
-//   if (!nearestEvent) {
-//     return <p className="text-center">No upcoming events found.</p>;
-//   }
+    eventDateTime.setHours(hours, minutes, 0, 0);
 
-//   return (
-//     <div className="bg-gray-300 rounded-lg shadow-lg overflow-hidden">
-//       {/* Event Banner */}
-//       <div className="relative">
-//         {nearestEvent.banner ? (
-//           <img
-//             src={`http://localhost:5000${nearestEvent.banner}`}
-//             alt={nearestEvent.title}
-//             className="w-full h-48 object-cover"
-//           />
-//         ) : (
-//           <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
-//             No Banner Available
-//           </div>
-//         )}
-//       </div>
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = eventDateTime - now;
 
-//       {/* Event Title and Time */}
-//       <div className="p-4">
-//         <h3 className="text-xl font-semibold">{nearestEvent.title}</h3>
-//         <p className="text-sm text-gray-600">{nearestEvent.time}</p>
-//       </div>
-//     </div>
-//   );
-// };
+      if (diff <= 0) {
+        setCountdown("In Progress");
+        return;
+      }
 
-// export default UpcomingEvent;
+      if (diff <= 3600000) {
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        setCountdown(`${minutes}m ${seconds}s`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [nearestEvent]);
+
+  if (loading) {
+    return <p className="text-center">Loading upcoming event...</p>;
+  }
+
+  if (error || !nearestEvent) {
+    return <p className="text-center">No upcoming events found.</p>;
+  }
+
+  return (
+    <div className="rounded-lg shadow-lg overflow-hidden h-60 flex flex-col">
+      {/* Banner (Hidden when event is 1 hour away) */}
+      <div className="relative flex-1">
+        {countdown ? (
+          <div className="w-full h-48 flex items-center justify-center bg-gray-100">
+            <p className="text-2xl font-bold text-red-500">{countdown}</p>
+          </div>
+        ) : nearestEvent.banner && bannerExists ? (
+          <img
+            src={
+              nearestEvent.banner
+                ? nearestEvent.banner
+                : "/assets/default-placeholder.png"
+            }
+            alt={nearestEvent.title}
+            className="w-full h-48 object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/assets/default-placeholder.png"; // Use a proper fallback
+            }}
+          />
+        ) : (
+          <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+            No Banner Available
+          </div>
+        )}
+      </div>
+
+      {/* Event Title, Date & Time (Always Visible) */}
+      <div className="mb-2 flex items-center justify-center space-x-1">
+        <h3 className="text-xl font-semibold">{nearestEvent.title}</h3>
+        <p className="text-sm text-gray-600 ">
+          ({new Date(nearestEvent.date).toLocaleDateString()} at{" "}
+          {nearestEvent.time})
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default UpcomingEvent;

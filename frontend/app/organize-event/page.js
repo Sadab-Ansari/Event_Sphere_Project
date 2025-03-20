@@ -20,10 +20,11 @@ const OrganizeEvent = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, files } = e.target;
 
-    if (name === "time") {
-      // Keep the time value in 24-hour format, but show AM/PM in the state.
+    if (type === "file") {
+      setFormData({ ...formData, [name]: files[0] }); // Store file correctly
+    } else if (name === "time") {
       let [hours, minutes] = value.split(":");
       if (formData.period === "PM" && hours !== "12") {
         hours = String(parseInt(hours) + 12);
@@ -32,7 +33,6 @@ const OrganizeEvent = () => {
       }
       setFormData({ ...formData, time: `${hours}:${minutes}` });
     } else if (name === "period") {
-      // Update period separately, but leave the time as is for now.
       setFormData({ ...formData, period: value });
     } else {
       setFormData({ ...formData, [name]: value });

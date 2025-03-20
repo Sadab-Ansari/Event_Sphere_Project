@@ -115,12 +115,9 @@ const EventsPage = () => {
           </p>
         ) : filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (
-            <motion.div
+            <div
               key={event._id}
-              className="bg-gray-700 rounded-2xl shadow-lg overflow-hidden"
-              initial={{ scale: 1 }}
-              whileHover={{ scale: 1.05 }} // ✅ Zoom-out effect on hover
-              transition={{ type: "spring", stiffness: 200, damping: 10 }}
+              className="bg-gray-700 rounded-2xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105"
             >
               <div className="relative">
                 {event.banner ? (
@@ -162,7 +159,7 @@ const EventsPage = () => {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))
         ) : (
           <p className="text-center text-gray-400 col-span-full text-xl">

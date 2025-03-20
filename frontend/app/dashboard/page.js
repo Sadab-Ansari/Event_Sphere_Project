@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 import Footer1 from "./Footer1";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
@@ -8,6 +8,7 @@ import Clock from "./Clock";
 import TrafficBarChart from "./TrafficBarChart";
 import ProgressPieChart from "./ProgessPieChart";
 import EventMessages from "./eMessage";
+import UpcomingEvent from "./UpcomingEvents";
 
 const Dashboard = () => {
   return (
@@ -24,7 +25,9 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
           <div className="md:col-span-2 grid gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-pink-400 rounded-lg shadow-lg"></div>
+              <div className="rounded-lg shadow-lg">
+                <UpcomingEvent />
+              </div>
               <div>
                 <TrafficBarChart />
               </div>

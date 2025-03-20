@@ -7,7 +7,7 @@ const {
   withdrawFromEvent,
   deleteEvent,
   updateEvent,
-  // getUpcomingEvents, // Import the new method
+  getNearestEventForUser, // ✅ Import the function
 } = require("../controllers/eventController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -59,8 +59,8 @@ router.post("/create", authMiddleware, (req, res, next) => {
 // ✅ Get All Events (Anyone can access)
 router.get("/all", getEvents);
 
-// ✅ Get Upcoming Events (Anyone can access)
-// router.get("/upcoming", getUpcomingEvents); // Add this route
+// ✅ Get Nearest Upcoming Event (Only for logged-in users)
+router.get("/nearest", authMiddleware, getNearestEventForUser);
 
 // ✅ Get Single Event by ID (Anyone can access)
 router.get("/:eventId", getEventById);

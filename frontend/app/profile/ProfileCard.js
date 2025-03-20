@@ -96,6 +96,7 @@ const ProfileCard = ({
       <h2 className="text-3xl font-bold text-gray-800 mb-4">My Profile</h2>
 
       {/* Profile Picture */}
+      {/* Profile Picture */}
       <div className="relative flex justify-center group">
         <div className="relative w-40 h-40">
           <img
@@ -116,34 +117,40 @@ const ProfileCard = ({
         {/* Add/Change/Remove Photo Options */}
         {isEditingPhoto && (
           <div className="absolute bottom-12 right-6 flex flex-col items-center space-y-2 bg-white p-3 rounded-lg shadow-md">
-            {/* Add/Change Photo */}
-            <label
-              htmlFor="profilePic"
-              className="text-gray-700 hover:text-cyan-700 cursor-pointer flex items-center gap-2"
-            >
-              <FaUserEdit />
-              <span>
-                {profilePic === "/default-profile.jpg"
-                  ? "Add Photo"
-                  : "Change Photo"}
-              </span>
-            </label>
+            {/* ✅ Show "Add Photo" only when there's no profile picture */}
+            {!user?.profilePic || user.profilePic === "/default-profile.jpg" ? (
+              <label
+                htmlFor="profilePic"
+                className="text-gray-700 hover:text-cyan-700 cursor-pointer flex items-center gap-2"
+              >
+                <FaUserEdit /> <span>Add Photo</span>
+              </label>
+            ) : (
+              <>
+                {/* ✅ Show "Change Photo" only when a profile picture exists */}
+                <label
+                  htmlFor="profilePic"
+                  className="text-gray-700 hover:text-cyan-700 cursor-pointer flex items-center gap-2"
+                >
+                  <FaUserEdit /> <span>Change Photo</span>
+                </label>
+
+                {/* ✅ Show "Remove Photo" only when a profile picture exists */}
+                <button
+                  onClick={handleRemoveProfilePic}
+                  className="text-red-600 hover:text-red-800 flex items-center gap-2"
+                >
+                  <FaTrash /> Remove
+                </button>
+              </>
+            )}
+
             <input
               type="file"
               id="profilePic"
               className="hidden"
               onChange={handleProfilePicChange}
             />
-
-            {/* ✅ Only Show "Remove" If Profile Pic Exists */}
-            {user?.profilePic && user.profilePic !== "/default-profile.jpg" && (
-              <button
-                onClick={handleRemoveProfilePic}
-                className="text-red-600 hover:text-red-800 flex items-center gap-2"
-              >
-                <FaTrash /> Remove
-              </button>
-            )}
           </div>
         )}
       </div>

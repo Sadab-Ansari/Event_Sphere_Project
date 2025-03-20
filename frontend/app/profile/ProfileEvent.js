@@ -3,6 +3,8 @@ import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { FaEnvelope, FaPhone, FaStar } from "react-icons/fa"; // ✅ Import necessary icons
 
 const ProfileEvent = ({
   events = [],
@@ -48,11 +50,9 @@ const ProfileEvent = ({
       {events.length > 0 ? (
         <ul className="space-y-4">
           {events.map((event) => (
-            <li
-              key={event._id}
-              className="p-4 bg-gray-800 rounded-lg flex justify-between"
-            >
-              <div>
+            <li key={event._id} className="p-4 bg-gray-800 rounded-lg">
+              {/* Title and Date on the Same Line */}
+              <div className="flex space-x-2 justify-center items-center">
                 <p className="text-white font-semibold text-lg">
                   {event.title}
                 </p>
@@ -61,21 +61,23 @@ const ProfileEvent = ({
                 </p>
               </div>
 
-              {type === "organized" ? (
-                <div className="flex gap-3">
+              {/* Buttons Below for Organized Events */}
+              {type === "organized" && (
+                <div className="flex gap-3 mt-3 justify-center">
                   <Link
                     href={`/edit-event/${event._id}`}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                    className="bg-blue-600 text-white w-[120px] h-[40px] flex items-center justify-center gap-2 rounded-lg"
                   >
                     <FaEdit className="text-white" />
                     Edit
                   </Link>
+
                   <button
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                    className="bg-red-600 text-white w-[120px] h-[40px] flex items-center justify-center gap-2 rounded-lg"
                     onClick={() => {
                       if (
                         window.confirm(
-                          "Are you sure you want to delte this event this event?"
+                          "Are you sure you want to delete this event?"
                         )
                       ) {
                         handleDeleteEvent(event._id);
@@ -85,28 +87,34 @@ const ProfileEvent = ({
                     <FaTrash className="text-white" />
                     Delete
                   </button>
+
                   <button
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg"
+                    className="bg-green-600 text-white w-[150px] h-[40px] flex items-center justify-center rounded-lg"
                     onClick={() => fetchParticipants(event)}
                   >
                     View Participants
                   </button>
                 </div>
-              ) : (
-                <button
-                  className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to withdraw from this event?"
-                      )
-                    ) {
-                      handleWithdraw(event._id);
-                    }
-                  }}
-                >
-                  Withdraw
-                </button>
+              )}
+
+              {/* Withdraw Button on Right for Participated Events */}
+              {type !== "organized" && (
+                <div className="flex justify-center mt-2">
+                  <button
+                    className="bg-yellow-500 text-white w-[150px] h-[40px] flex items-center justify-center rounded-lg"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to withdraw from this event?"
+                        )
+                      ) {
+                        handleWithdraw(event._id);
+                      }
+                    }}
+                  >
+                    Withdraw
+                  </button>
+                </div>
               )}
             </li>
           ))}
@@ -116,7 +124,13 @@ const ProfileEvent = ({
       )}
 
       {selectedEvent && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
+          initial={{ scale: 0, opacity: 0 }} // Starts from the center, hidden
+          animate={{ scale: 1, opacity: 1 }} // Expands smoothly to full size
+          exit={{ scale: 0, opacity: 0 }} // Shrinks back when closed
+          transition={{ type: "spring", stiffness: 100, damping: 12 }} // Smooth spring effect
+        >
           <div className="bg-gray-900 p-6 rounded-lg w-[600px] max-w-full">
             <h2 className="text-xl font-bold text-white text-center mb-4">
               Participants for {selectedEvent.title}
@@ -133,14 +147,19 @@ const ProfileEvent = ({
                       <p className="font-semibold">
                         {participant.user?.name || "N/A"}
                       </p>
-                      <p className="text-sm text-gray-300">
-                        📧 {participant.user?.email || "N/A"}
+
+                      <p className="text-sm text-gray-300 flex items-center gap-2">
+                        <FaEnvelope className="text-gray-400" />{" "}
+                        {participant.user?.email || "N/A"}
                       </p>
-                      <p className="text-sm text-gray-300">
-                        📞 {participant.user?.phone || "N/A"}
+
+                      <p className="text-sm text-gray-300 flex items-center gap-2">
+                        <FaPhone className="text-gray-400" />{" "}
+                        {participant.user?.phone || "N/A"}
                       </p>
-                      <p className="text-sm text-gray-300">
-                        🎯 Interest:{" "}
+
+                      <p className="text-sm text-gray-300 flex items-center gap-2">
+                        <FaStar className="text-yellow-400" /> Interest:{" "}
                         {participant.interests?.length > 0
                           ? participant.interests.join(", ")
                           : "Not specified"}
@@ -173,7 +192,7 @@ const ProfileEvent = ({
               Close
             </button>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
