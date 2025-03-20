@@ -77,6 +77,12 @@ const UpcomingEvent = () => {
     <div className="rounded-lg shadow-lg overflow-hidden h-60 flex flex-col">
       {/* Banner (Hidden when event is 1 hour away) */}
       <div className="relative flex-1">
+        {/* "Upcoming Event" Label - Positioned Above the Banner */}
+        <div className="absolute top-2 left-2 bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-semibold z-20">
+          Upcoming Event
+        </div>
+
+        {/* Banner (or Countdown when 1 hour remains) */}
         {countdown ? (
           <div className="w-full h-48 flex items-center justify-center bg-gray-100">
             <p className="text-2xl font-bold text-red-500">{countdown}</p>
@@ -92,7 +98,7 @@ const UpcomingEvent = () => {
             className="w-full h-48 object-cover"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "/assets/default-placeholder.png"; // Use a proper fallback
+              e.target.src = "/assets/default-placeholder.png";
             }}
           />
         ) : (
