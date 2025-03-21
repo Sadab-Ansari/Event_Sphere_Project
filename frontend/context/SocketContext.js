@@ -1,4 +1,5 @@
 "use client";
+import SidebarMenu from "@/components/SideMenu";
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -16,7 +17,10 @@ export function SocketProvider({ children }) {
   }, []);
 
   return (
-    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+    <SocketContext.Provider value={socket}>
+      <SidebarMenu />
+      {children}
+    </SocketContext.Provider>
   );
 }
 

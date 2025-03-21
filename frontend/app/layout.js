@@ -8,7 +8,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="flex flex-col min-h-screen">
         <SocketProvider>
-          <Navbar />
+          {/* <Navbar /> */}
           <main className="flex-1">{children}</main> {/* Page content */}
           {/* <Footer /> */} {/* Uncomment if needed */}
         </SocketProvider>

@@ -111,7 +111,7 @@ const OrganizeEvent = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-900 text-white px-6">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-900 text-white px-6 pb-6">
       <h1 className="text-4xl font-extrabold text-blue-500 mb-6">
         Organize Event
       </h1>
