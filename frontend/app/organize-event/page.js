@@ -200,6 +200,7 @@ const OrganizeEvent = () => {
           accept="image/*"
           onChange={handleChange}
           className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
         />
         <button
           type="submit"
