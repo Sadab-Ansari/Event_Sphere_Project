@@ -94,7 +94,8 @@ const EventsPage = () => {
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-900 space-x-2 md:ml-16">
+    <div className="flex min-h-screen bg-gray-900 space-x-2 ">
+      {/* md:ml-16 */}
       {/* Sidebar */}
       {/* <div className=" w-16 min-h-screen bg-gray-800">
         <SidebarMenu />
