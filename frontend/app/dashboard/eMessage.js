@@ -50,11 +50,11 @@ const EventMessages = () => {
       <div className="rounded-lg pl-1 shadow-md w-full mx-auto h-full">
         <h2 className="text-lg font-semibold ml-3">Event Messages</h2>
 
-        {loading && <p>Loading messages...</p>}
+        {loading && <p className="flex justify-center">Loading messages...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
         {!loading && !error && messages.length === 0 && (
-          <p>No messages found.</p>
+          <p className="flex justify-center">No messages found.</p>
         )}
 
         <div className="h-72 overflow-auto">

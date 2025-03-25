@@ -1,32 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import socket from "../socket";
 import ChatBox from "../chatBox";
 
 export default function ChatPage() {
+  const { id: receiverId } = useParams(); // Get receiverId from URL
+  const router = useRouter();
   const [userId, setUserId] = useState(null);
-  const [receiverId, setReceiverId] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Load userId from localStorage
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
     if (storedUserId && storedUserId !== "null") {
       setUserId(storedUserId);
-
-      fetch(`http://localhost:5000/api/chat/getReceiverId/${storedUserId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.receiverId) setReceiverId(data.receiverId);
-        })
-        .catch((err) => console.error("Error fetching receiverId:", err))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
     }
+    setLoading(false);
   }, []);
 
+  // ✅ Join room only when userId is available
   useEffect(() => {
     if (userId) {
       socket.emit("joinRoom", userId);
@@ -47,17 +42,17 @@ export default function ChatPage() {
           {onlineUsers.length === 0 ? (
             <p className="text-gray-500">No online users.</p>
           ) : (
-            onlineUsers.map((user, index) => (
+            onlineUsers.map((user) => (
               <div
-                key={user.userId || index}
+                key={user.userId} // ✅ Unique key added
                 className={`p-2 rounded cursor-pointer ${
                   receiverId === user.userId
                     ? "bg-gray-700"
                     : "hover:bg-gray-800"
                 }`}
-                onClick={() => setReceiverId(user.userId)}
+                onClick={() => router.push(`/chat/${user.userId}`)} // ✅ Use router.push()
               >
-                <p>{user.username || user.userId}</p>
+                <p>{user.username || `User ${user.userId}`}</p>
                 <span className="text-sm text-gray-400">
                   Last message preview...
                 </span>

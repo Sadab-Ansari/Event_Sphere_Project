@@ -1,21 +1,17 @@
 const mongoose = require("mongoose");
 const Chat = require("../models/chatModel");
-const User = require("../models/userModel"); // Import User model
+const User = require("../models/userModel");
 
-// ✅ Send a message
+// Send a message
 const sendMessage = async (req, res) => {
   try {
     const { senderId, receiverId, message } = req.body;
     const io = req.app.get("io");
 
-    console.log("🟢 Received API Call: sendMessage");
-
-    // Validate required fields
     if (!senderId || !receiverId || !message.trim()) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Validate ObjectId format
     if (
       !mongoose.Types.ObjectId.isValid(senderId) ||
       !mongoose.Types.ObjectId.isValid(receiverId)
@@ -23,50 +19,40 @@ const sendMessage = async (req, res) => {
       return res.status(400).json({ error: "Invalid senderId or receiverId" });
     }
 
-    // Validate sender and receiver existence
-    const [senderExists, receiverExists] = await Promise.all([
-      User.exists({ _id: senderId }),
-      User.exists({ _id: receiverId }),
-    ]);
+    const senderExists = await User.findById(senderId);
+    const receiverExists = await User.findById(receiverId);
 
     if (!senderExists || !receiverExists) {
-      return res
-        .status(404)
-        .json({ error: "Sender or Receiver does not exist" });
+      return res.status(404).json({ error: "Sender or receiver not found" });
     }
 
-    // Save message to DB
-    const newMessage = await new Chat({
+    const newMessage = new Chat({
       senderId,
       receiverId,
       message: message.trim(),
-    }).save();
+    });
 
-    console.log("✅ Message saved successfully:", newMessage);
+    await newMessage.save();
+    await newMessage.populate("senderId", "name email");
+    await newMessage.populate("receiverId", "name email");
 
-    // Emit message to sender and receiver
     if (io) {
       io.to(senderId.toString()).emit("receiveMessage", newMessage);
       if (senderId.toString() !== receiverId.toString()) {
         io.to(receiverId.toString()).emit("receiveMessage", newMessage);
       }
-    } else {
-      console.error("❌ io instance is undefined");
     }
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.error("❌ Error in sendMessage:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// ✅ Get messages between two users
+// Get messages between two users
 const getMessages = async (req, res) => {
   try {
     const { senderId, receiverId } = req.params;
-
-    console.log("🟢 Received API Call: getMessages");
 
     if (!senderId || !receiverId) {
       return res
@@ -81,20 +67,58 @@ const getMessages = async (req, res) => {
       return res.status(400).json({ error: "Invalid senderId or receiverId" });
     }
 
-    // Fetch messages sorted by creation time
     const messages = await Chat.find({
       $or: [
         { senderId, receiverId },
         { senderId: receiverId, receiverId: senderId },
       ],
-    }).sort({ createdAt: 1 });
+    })
+      .populate("senderId", "name email")
+      .populate("receiverId", "name email")
+      .sort({ createdAt: 1 });
 
-    console.log("✅ Messages fetched successfully:", messages.length);
     res.status(200).json(messages);
   } catch (error) {
-    console.error("❌ Error in getMessages:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-module.exports = { sendMessage, getMessages };
+// Get latest chat for each user
+const getChatList = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "Invalid userId" });
+    }
+
+    const chatList = await Chat.aggregate([
+      {
+        $match: {
+          $or: [
+            { senderId: new mongoose.Types.ObjectId(userId) },
+            { receiverId: new mongoose.Types.ObjectId(userId) },
+          ],
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: {
+            senderId: "$senderId",
+            receiverId: "$receiverId",
+          },
+          latestMessage: { $first: "$message" },
+          timestamp: { $first: "$createdAt" },
+        },
+      },
+      { $sort: { timestamp: -1 } },
+    ]);
+
+    res.status(200).json(chatList);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+module.exports = { sendMessage, getMessages, getChatList };

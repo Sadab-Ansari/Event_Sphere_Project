@@ -12,12 +12,10 @@ const createEventMessage = async (req, res) => {
     const io = req.app.get("io"); // ✅ Get the socket instance from Express
 
     if (!userId || !eventId || !actionType) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "User ID, Event ID, and Action Type are required.",
-        });
+      return res.status(400).json({
+        success: false,
+        error: "User ID, Event ID, and Action Type are required.",
+      });
     }
 
     // ✅ Convert to ObjectId if needed
@@ -53,12 +51,10 @@ const createEventMessage = async (req, res) => {
     } else if (actionType === "participate") {
       message = `${user.name} participated in the event "${event.title}"`;
     } else {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "Invalid actionType. Must be 'create' or 'participate'.",
-        });
+      return res.status(400).json({
+        success: false,
+        error: "Invalid actionType. Must be 'create' or 'participate'.",
+      });
     }
 
     // ✅ Create and save the event message
@@ -113,9 +109,7 @@ const getAllEventMessages = async (req, res) => {
       .lean();
 
     if (!messages.length) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No event messages found." });
+      return res.status(200).json({ success: true, messages: [] }); // ✅ Return empty array with 200 status
     }
 
     console.log(`✅ Retrieved ${messages.length} event messages.`);

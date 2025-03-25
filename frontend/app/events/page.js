@@ -65,13 +65,11 @@ const EventsPage = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          participant: {
-            user: userId,
-            interests: [selectedInterest],
-          },
+          interests: [selectedInterest], // ✅ Send interests directly
         }),
       }
     );
+
     const data = await response.json();
     if (response.ok) {
       alert("Successfully registered for the event!");
@@ -163,13 +161,13 @@ const EventsPage = () => {
                     <div className="flex justify-center gap-4 mt-6">
                       <button
                         onClick={() => handleChat(event.organizer)}
-                        className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition flex items-center gap-2"
+                        className="bg-gradient-to-tr from-green-500 to-red-400 text-white px-5 py-2 rounded-md hover:bg-green-700 transition flex items-center gap-2"
                       >
                         <FaComments /> Chat
                       </button>
                       <button
                         onClick={() => handleParticipate(event)}
-                        className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition"
+                        className="bg-gradient-to-tr from-blue-500 to-red-500 text-white px-5 py-2 rounded-md hover:bg-green-700 transition"
                       >
                         Participate
                       </button>

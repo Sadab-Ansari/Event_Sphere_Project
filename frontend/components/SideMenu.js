@@ -23,7 +23,7 @@ const menuItems = [
   { icon: User, href: "/profile", label: "Profile" },
   { icon: LayoutDashboard, href: "/dashboard", label: "Dashboard" },
   { icon: Calendar, href: "/events", label: "Events" },
-  { icon: MessageCircle, href: "/messages", label: "Messages" },
+  { icon: MessageCircle, href: "/chat", label: "Messages" },
   { icon: Info, href: "/about", label: "About" },
   { icon: PlusCircle, href: "/organize-event", label: "Organize" },
 ];
@@ -57,7 +57,7 @@ export default function SidebarMenu() {
   if (pathname === "/dashboard") return null;
 
   return (
-    <div className="relative w-16">
+    <div className="relative">
       {/* Hamburger Icon */}
       <button
         onClick={() => setIsOpen(!isOpen)}

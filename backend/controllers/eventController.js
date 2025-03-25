@@ -102,14 +102,9 @@ const registerForEvent = async (req, res) => {
 
     if (!event) return res.status(404).json({ error: "Event not found" });
 
-    const isAlreadyRegistered = event.participants.some(
+    const existingParticipant = event.participants.find(
       (p) => p.user.toString() === req.user.id
     );
-    if (isAlreadyRegistered) {
-      return res
-        .status(400)
-        .json({ error: "You are already registered for this event." });
-    }
 
     // Handle interests
     const userInterests =
@@ -117,8 +112,14 @@ const registerForEvent = async (req, res) => {
         ? interests.split(",").map((i) => i.trim())
         : interests || [];
 
-    // Add the user to the participants list
-    event.participants.push({ user: req.user.id, interests: userInterests });
+    if (existingParticipant) {
+      existingParticipant.interests = [
+        ...new Set([...existingParticipant.interests, ...userInterests]),
+      ];
+    } else {
+      event.participants.push({ user: req.user.id, interests: userInterests });
+    }
+
     await event.save();
 
     // Create a message when the user participates in the event
@@ -149,8 +150,30 @@ const registerForEvent = async (req, res) => {
 
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find().populate("organizer", " _id name email");
-    res.status(200).json(events);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Normalize to midnight
+
+    const events = await Event.find().populate("organizer", "_id name email");
+
+    const activeEvents = events.filter((event) => {
+      const eventDateTime = new Date(event.date);
+      console.log("Raw Event Date:", event.date, "Time:", event.time); // Debugging
+
+      const [time, period] = event.time.split(" ");
+      let [hours, minutes] = time.split(":").map(Number);
+
+      if (period === "PM" && hours !== 12) hours += 12;
+      if (period === "AM" && hours === 12) hours = 0;
+
+      eventDateTime.setHours(hours, minutes, 0, 0); // Set event time properly
+      console.log("Final Event DateTime:", eventDateTime);
+
+      return now <= eventDateTime; // ✅ Allow today's events to be shown
+    });
+
+    console.log("Filtered Events:", activeEvents); // Debugging
+
+    res.status(200).json(activeEvents);
   } catch (error) {
     console.error("Error fetching events:", error);
     res.status(500).json({ error: "Server error" });

@@ -61,6 +61,7 @@ const trafficRoutes = require("./routes/trafficRoutes");
 const progressRoutes = require("./routes/progressRoutes");
 const eventMessageRoutes = require("./routes/eventMessageRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const imageRoutes = require("./routes/imageRoutes"); // ✅ Added image routes
 
 app.use("/api/chat", chatRoutes);
 app.use("/api/eventMessage", eventMessageRoutes); // ✅ Updated event message route
@@ -69,6 +70,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/events", eventRoutes); // ✅ Handles nearest event route
 app.use("/api/traffic", trafficRoutes);
 app.use("/api/progress", progressRoutes);
+app.use("/api/images", imageRoutes); // ✅ Image generation route added
 
 // ✅ Catch 404 Errors (Not Found)
 app.use((req, res, next) => {

@@ -1,6 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { sendMessage, getMessages } = require("../controllers/chatController");
+const {
+  sendMessage,
+  getMessages,
+  getChatList,
+} = require("../controllers/chatController");
 const User = require("../models/userModel");
 const Chat = require("../models/chatModel");
 
@@ -19,7 +23,7 @@ const validateObjectIds = (req, res, next) => {
   next();
 };
 
-// ✅ Route to dynamically get receiverId excluding the current user
+// ✅ Route to get receiverIds of users who have chatted with the given user
 router.get("/getReceiverId/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -28,11 +32,39 @@ router.get("/getReceiverId/:userId", async (req, res) => {
   }
 
   try {
-    const receiver = await User.findOne({ _id: { $ne: userId } });
-    if (!receiver) return res.status(404).json({ error: "No receiver found" });
+    const chatUsers = await Chat.aggregate([
+      {
+        $match: {
+          $or: [
+            { senderId: new mongoose.Types.ObjectId(userId) },
+            { receiverId: new mongoose.Types.ObjectId(userId) },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          userIds: { $addToSet: "$senderId" },
+          otherUserIds: { $addToSet: "$receiverId" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          receiverIds: { $setUnion: ["$userIds", "$otherUserIds"] },
+        },
+      },
+    ]);
 
-    return res.status(200).json({ receiverId: receiver._id });
+    if (!chatUsers.length || !chatUsers[0].receiverIds.includes(userId)) {
+      return res.status(404).json({ error: "No chat history found" });
+    }
+
+    return res.status(200).json({
+      receiverIds: chatUsers[0].receiverIds.filter((id) => id !== userId),
+    });
   } catch (error) {
+    console.error("❌ Error fetching receiver IDs:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -54,7 +86,7 @@ router.post("/send", validateObjectIds, async (req, res, next) => {
 // ✅ Route to get messages between two users
 router.get("/:senderId/:receiverId", validateObjectIds, getMessages);
 
-// ✅ Route to get all conversations for a user with populated user details
+// ✅ Route to get all conversations for a user with unique chat partners
 router.get("/conversations/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -72,43 +104,52 @@ router.get("/conversations/:userId", async (req, res) => {
           ],
         },
       },
+      { $sort: { createdAt: -1 } },
       {
         $group: {
           _id: {
-            senderId: "$senderId",
-            receiverId: "$receiverId",
+            participants: {
+              $cond: [
+                { $eq: ["$senderId", new mongoose.Types.ObjectId(userId)] },
+                "$receiverId",
+                "$senderId",
+              ],
+            },
           },
-          lastMessage: { $last: "$message" },
-          updatedAt: { $last: "$updatedAt" },
+          lastMessage: { $first: "$message" },
+          updatedAt: { $first: "$updatedAt" },
         },
       },
-      {
-        $sort: { updatedAt: -1 },
-      },
+      { $sort: { updatedAt: -1 } },
     ]);
 
-    // Populate sender and receiver details for better frontend display
-    const populatedConversations = await Promise.all(
-      conversations.map(async (conv) => {
-        const sender = await User.findById(conv._id.senderId).select(
-          "name email"
-        );
-        const receiver = await User.findById(conv._id.receiverId).select(
-          "name email"
-        );
+    const userIds = conversations.map((conv) => conv._id.participants);
 
-        return {
-          sender,
-          receiver,
-          lastMessage: conv.lastMessage,
-          updatedAt: conv.updatedAt,
-        };
-      })
+    const users = await User.find({ _id: { $in: userIds } }).select(
+      "name email"
     );
+
+    const populatedConversations = conversations.map((conv) => ({
+      user: users.find(
+        (user) => user._id.toString() === conv._id.participants.toString()
+      ),
+      lastMessage: conv.lastMessage,
+      updatedAt: conv.updatedAt,
+    }));
 
     res.status(200).json(populatedConversations);
   } catch (error) {
     console.error("❌ Error in conversations route:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// ✅ Route to get chat list for a user
+router.get("/chatlist/:userId", async (req, res) => {
+  try {
+    await getChatList(req, res);
+  } catch (error) {
+    console.error("❌ Error fetching chat list:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

@@ -3,11 +3,13 @@
 import { useState } from "react";
 
 const OrganizeEvent = () => {
+  const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+
   const [formData, setFormData] = useState({
     title: "",
     date: "",
-    time: "12:00", // Set a default time to avoid uncontrolled input
-    period: "AM", // AM/PM selection
+    time: "12:00",
+    period: "AM",
     location: "",
     description: "",
     maxParticipants: "",
@@ -23,17 +25,7 @@ const OrganizeEvent = () => {
     const { name, value, type, files } = e.target;
 
     if (type === "file") {
-      setFormData({ ...formData, [name]: files[0] }); // Store file correctly
-    } else if (name === "time") {
-      let [hours, minutes] = value.split(":");
-      if (formData.period === "PM" && hours !== "12") {
-        hours = String(parseInt(hours) + 12);
-      } else if (formData.period === "AM" && hours === "12") {
-        hours = "00";
-      }
-      setFormData({ ...formData, time: `${hours}:${minutes}` });
-    } else if (name === "period") {
-      setFormData({ ...formData, period: value });
+      setFormData({ ...formData, [name]: files[0] });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -45,6 +37,12 @@ const OrganizeEvent = () => {
     setSuccessMessage("");
     setIsLoading(true);
 
+    if (formData.date < today) {
+      setError("Event date must be today or a future date.");
+      setIsLoading(false);
+      return;
+    }
+
     const token = localStorage.getItem("token");
     if (!token) {
       setError("You must be logged in to create an event.");
@@ -52,19 +50,10 @@ const OrganizeEvent = () => {
       return;
     }
 
-    // Format the time before submission
-    let [hours, minutes] = formData.time.split(":");
-    if (formData.period === "PM" && hours !== "12") {
-      hours = String(parseInt(hours) + 12);
-    } else if (formData.period === "AM" && hours === "12") {
-      hours = "00";
-    }
-    const formattedTime = `${hours}:${minutes}`;
-
     const eventData = new FormData();
     eventData.append("title", formData.title);
     eventData.append("date", formData.date);
-    eventData.append("time", formattedTime); // Send converted time
+    eventData.append("time", formData.time);
     eventData.append("location", formData.location);
     eventData.append("description", formData.description);
     eventData.append("maxParticipants", formData.maxParticipants);
@@ -91,7 +80,7 @@ const OrganizeEvent = () => {
         setFormData({
           title: "",
           date: "",
-          time: "12:00", // Reset to default time
+          time: "12:00",
           period: "AM",
           location: "",
           description: "",
@@ -136,11 +125,11 @@ const OrganizeEvent = () => {
           name="date"
           value={formData.date}
           onChange={handleChange}
+          min={today} // Prevent past dates
           className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
 
-        {/* Time Input with AM/PM Selection */}
         <div className="flex space-x-2">
           <input
             type="time"
