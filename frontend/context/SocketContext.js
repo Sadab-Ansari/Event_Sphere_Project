@@ -6,7 +6,7 @@ import { io } from "socket.io-client";
 const SocketContext = createContext();
 
 export function SocketProvider({ children }) {
-  // ✅ Named export
+  // Named export
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {

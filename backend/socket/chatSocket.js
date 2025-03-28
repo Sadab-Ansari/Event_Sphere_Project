@@ -13,7 +13,7 @@ const setupSocket = (server) => {
   const onlineUsers = new Map(); // Track userId → socket.id
 
   io.on("connection", (socket) => {
-    console.log(`✅ User connected: ${socket.id}`);
+    console.log(` User connected: ${socket.id}`);
 
     // 📌 When a user joins, remove their old socket ID if present
     socket.on("joinRoom", (userId) => {
@@ -54,9 +54,9 @@ const setupSocket = (server) => {
           createdAt: new Date(),
         });
 
-        console.log(`📩 Message sent from ${senderId} to ${receiverId}`);
+        console.log(` Message sent from ${senderId} to ${receiverId}`);
 
-        // ✅ Send only if receiver is online
+        //  Send only if receiver is online
         if (onlineUsers.has(receiverId)) {
           io.to(receiverId).emit("receiveMessage", savedMessage);
         }
@@ -71,9 +71,9 @@ const setupSocket = (server) => {
       try {
         await Chat.findByIdAndUpdate(messageId, { isRead: true });
         io.to(userId).emit("messageRead", messageId);
-        console.log(`✅ Message ${messageId} marked as read by ${userId}`);
+        console.log(` Message ${messageId} marked as read by ${userId}`);
       } catch (error) {
-        console.error("❌ Error marking message as read:", error);
+        console.error(" Error marking message as read:", error);
       }
     });
 

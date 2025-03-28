@@ -62,7 +62,7 @@ const TrafficBarChart = () => {
   }, []);
 
   return (
-    <div className="relative w-full max-w-sm md:max-w-md h-60 bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="relative w-full md:max-w-md h-60 bg-white rounded-lg shadow-md overflow-hidden">
       {/* Title inside the chart with absolute positioning */}
       <h2 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-gray-200 z-0">
         Website Traffic

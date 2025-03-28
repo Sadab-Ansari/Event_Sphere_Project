@@ -34,7 +34,7 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="h-80 sm:col-span-2 ">
+              <div className="h-80 sm:col-span-2">
                 <EventMessages />
               </div>
               <div className="h-80 flex justify-between items-center flex-col">
@@ -52,7 +52,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="h-full rounded-lg flex flex-col md:flex justify-between">
+          <div className="h-full rounded-lg flex flex-col md:flex md:justify-between space-y-3">
             <div>
               <Calendar />
             </div>

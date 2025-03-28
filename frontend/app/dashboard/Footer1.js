@@ -11,9 +11,9 @@ const Footer1 = () => {
         {/* Left - EventManager */}
         <div className="text-left">
           <h2 className="text-xl font-bold">EventManager</h2>
-          <p className="text-base mt-1">
+          {/* <p className="text-base mt-1">
             © {new Date().getFullYear()} All Rights Reserved
-          </p>
+          </p> */}
         </div>
 
         {/* Middle - Navigation Links */}
@@ -48,9 +48,9 @@ const Footer1 = () => {
         {/* Top - EventManager */}
         <div>
           <h2 className="text-2xl font-bold">EventManager</h2>
-          <p className="text-lg mt-1">
+          {/* <p className="text-lg mt-1">
             © {new Date().getFullYear()} All Rights Reserved
-          </p>
+          </p> */}
         </div>
 
         {/* Middle - Navigation Links */}

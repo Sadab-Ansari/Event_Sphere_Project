@@ -65,7 +65,7 @@ const createEvent = async (req, res) => {
 
     await newEvent.save();
 
-    // ✅ Create EventMessage when an event is created
+    //  Create EventMessage when an event is created
     const message = `${req.user.name} created the event "${newEvent.title}"`;
     const eventMessage = new EventMessage({
       userId: req.user.id,
@@ -75,7 +75,7 @@ const createEvent = async (req, res) => {
 
     await eventMessage.save();
 
-    // ✅ Emit real-time event message
+    //  Emit real-time event message
     const io = req.app.get("io");
     io.emit("newEventMessage", {
       _id: eventMessage._id,
@@ -157,7 +157,7 @@ const getEvents = async (req, res) => {
 
     const activeEvents = events.filter((event) => {
       const eventDateTime = new Date(event.date);
-      console.log("Raw Event Date:", event.date, "Time:", event.time); // Debugging
+      // console.log("Raw Event Date:", event.date, "Time:", event.time); // Debugging
 
       const [time, period] = event.time.split(" ");
       let [hours, minutes] = time.split(":").map(Number);
@@ -166,12 +166,12 @@ const getEvents = async (req, res) => {
       if (period === "AM" && hours === 12) hours = 0;
 
       eventDateTime.setHours(hours, minutes, 0, 0); // Set event time properly
-      console.log("Final Event DateTime:", eventDateTime);
+      // console.log("Final Event DateTime:", eventDateTime);
 
-      return now <= eventDateTime; // ✅ Allow today's events to be shown
+      return now <= eventDateTime; //  Allow today's events to be shown
     });
 
-    console.log("Filtered Events:", activeEvents); // Debugging
+    // console.log("Filtered Events:", activeEvents); // Debugging
 
     res.status(200).json(activeEvents);
   } catch (error) {
@@ -301,7 +301,7 @@ const getNearestEventForUser = async (req, res) => {
     const events = await Event.find({ "participants.user": userId });
 
     if (!events.length) {
-      console.log("No upcoming events found for user:", userId);
+      // console.log("No upcoming events found for user:", userId);
       return res.status(404).json({ error: "No upcoming events found." });
     }
 
@@ -329,7 +329,7 @@ const getNearestEventForUser = async (req, res) => {
       .sort((a, b) => a.eventDateTime - b.eventDateTime);
 
     if (!upcomingEvents.length) {
-      console.log("No future events found.");
+      // console.log("No future events found.");
       return res.status(404).json({ error: "No upcoming events found." });
     }
 

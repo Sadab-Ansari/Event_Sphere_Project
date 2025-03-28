@@ -2,10 +2,10 @@ const Event = require("../models/eventModel");
 const moment = require("moment");
 
 const setupCountdownSocket = (io) => {
-  console.log("✅ Countdown socket initialized");
+  console.log(" Countdown socket initialized");
 
   io.on("connection", async (socket) => {
-    console.log("🔗 User connected to countdown socket");
+    console.log(" User connected to countdown socket");
 
     // Function to emit countdown for the nearest event
     const emitNearestEventCountdown = async (userId) => {
@@ -46,18 +46,18 @@ const setupCountdownSocket = (io) => {
           });
         }
       } catch (error) {
-        console.error("❌ Error fetching nearest event:", error);
+        console.error(" Error fetching nearest event:", error);
       }
     };
 
     // Listen for user joining countdown updates
     socket.on("joinCountdown", async (userId) => {
-      console.log(`📢 User ${userId} joined countdown updates`);
+      console.log(` User ${userId} joined countdown updates`);
       await emitNearestEventCountdown(userId);
     });
 
     socket.on("disconnect", () => {
-      console.log("❌ User disconnected from countdown socket");
+      console.log(" User disconnected from countdown socket");
     });
   });
 };
