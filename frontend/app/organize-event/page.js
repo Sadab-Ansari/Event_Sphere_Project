@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter for redirection
 
 const OrganizeEvent = () => {
   const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+  const router = useRouter(); // Initialize the router for redirection
 
   const [formData, setFormData] = useState({
     title: "",
@@ -68,11 +70,14 @@ const OrganizeEvent = () => {
     eventData.append("interests", JSON.stringify(formattedInterests));
 
     try {
-      const response = await fetch("http://localhost:5000/api/events/create", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: eventData,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/create`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: eventData,
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -88,6 +93,11 @@ const OrganizeEvent = () => {
           banner: null,
           interests: "",
         });
+
+        // Redirect to the newly created event page after creation
+        setTimeout(() => {
+          router.push("/events"); // Assuming `eventId` is returned from the API
+        }, 2000); // Redirect after 2 seconds
       } else {
         setError(data.message || "Failed to create event");
       }
@@ -106,9 +116,6 @@ const OrganizeEvent = () => {
       </h1>
 
       {error && <p className="text-red-500 text-center">{error}</p>}
-      {successMessage && (
-        <p className="text-green-500 text-center">{successMessage}</p>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
         <input
@@ -191,6 +198,12 @@ const OrganizeEvent = () => {
           className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+
+        {/* Success Message directly above the Create Event button */}
+        {successMessage && (
+          <p className="text-green-500 text-center mb-4">{successMessage}</p>
+        )}
+
         <button
           type="submit"
           className={`w-full p-4 text-white rounded-xl transition ${

@@ -20,7 +20,7 @@ const Hero = () => {
             Browse Events
           </Link>
           <Link
-            href="/signup"
+            href="/login"
             className="bg-gray-200 text-cyan-700 px-6 py-3 rounded-md font-semibold hover:bg-gray-300"
           >
             Get Started

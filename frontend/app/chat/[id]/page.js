@@ -12,7 +12,7 @@ export default function ChatPage() {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Load userId from localStorage
+  //  Load userId from localStorage
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
     if (storedUserId && storedUserId !== "null") {
@@ -21,7 +21,7 @@ export default function ChatPage() {
     setLoading(false);
   }, []);
 
-  // ✅ Join room only when userId is available
+  //  Join room only when userId is available
   useEffect(() => {
     if (userId) {
       socket.emit("joinRoom", userId);
@@ -44,13 +44,13 @@ export default function ChatPage() {
           ) : (
             onlineUsers.map((user) => (
               <div
-                key={user.userId} // ✅ Unique key added
+                key={user.userId} //  Unique key added
                 className={`p-2 rounded cursor-pointer ${
                   receiverId === user.userId
                     ? "bg-gray-700"
                     : "hover:bg-gray-800"
                 }`}
-                onClick={() => router.push(`/chat/${user.userId}`)} // ✅ Use router.push()
+                onClick={() => router.push(`/chat/${user.userId}`)} //  Use router.push()
               >
                 <p>{user.username || `User ${user.userId}`}</p>
                 <span className="text-sm text-gray-400">

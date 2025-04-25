@@ -4,15 +4,15 @@ import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Label } from "recharts";
 
 export default function ProgressPieChart() {
-  const [progress, setProgress] = useState(60); // ✅ Static Default (60% completed)
+  const [progress, setProgress] = useState(60); //  Static Default (60% completed)
   const [remaining, setRemaining] = useState(40);
   const [isClient, setIsClient] = useState(false);
-  const [isDynamic, setIsDynamic] = useState(false); // ✅ Toggle for Dynamic Mode
+  const [isDynamic, setIsDynamic] = useState(false); //  Toggle for Dynamic Mode
 
   useEffect(() => {
     setIsClient(true);
 
-    // ✅ Remove this condition to fetch real data
+    //  Remove this condition to fetch real data
     if (isDynamic) {
       fetchProgress();
     }
@@ -20,7 +20,10 @@ export default function ProgressPieChart() {
 
   const fetchProgress = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/progress");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/progress`
+      );
+
       const data = await response.json();
       if (data) {
         const completed = data.completed || 0;

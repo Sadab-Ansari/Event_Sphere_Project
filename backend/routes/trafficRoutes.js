@@ -5,10 +5,10 @@ const {
   getTrafficData,
 } = require("../controllers/trafficController"); // Ensure correct import
 
-// ✅ Route to log website traffic
+//  Route to log website traffic
 router.post("/log", logTraffic); // Route to log website traffic
 
-// ✅ Route to fetch traffic data
+//  Route to fetch traffic data
 router.get("/data", getTrafficData); // Route to fetch traffic data
 
 module.exports = router;

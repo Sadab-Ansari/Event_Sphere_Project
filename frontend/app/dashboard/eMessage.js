@@ -2,7 +2,8 @@ import { useState, useEffect } from "react"; // Import useState and useEffect
 import io from "socket.io-client";
 import Link from "next/link";
 
-const socket = io("http://localhost:5000"); // Make sure socket is defined here
+const socket = io(process.env.NEXT_PUBLIC_API_URL);
+// Make sure socket is defined here
 
 const EventMessages = () => {
   const [messages, setMessages] = useState([]);
@@ -15,7 +16,7 @@ const EventMessages = () => {
     const fetchMessages = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/eventMessage/all"
+          `${process.env.NEXT_PUBLIC_API_URL}/api/eventMessage/all`
         );
 
         if (!response.ok) {

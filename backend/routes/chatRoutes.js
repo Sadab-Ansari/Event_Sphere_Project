@@ -23,7 +23,7 @@ const validateObjectIds = (req, res, next) => {
   next();
 };
 
-// ✅ Route to get receiverIds of users who have chatted with the given user
+//  Route to get receiverIds of users who have chatted with the given user
 router.get("/getReceiverId/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -69,7 +69,7 @@ router.get("/getReceiverId/:userId", async (req, res) => {
   }
 });
 
-// ✅ Route to send a message
+//  Route to send a message
 router.post("/send", validateObjectIds, async (req, res, next) => {
   try {
     const { message } = req.body;
@@ -83,10 +83,10 @@ router.post("/send", validateObjectIds, async (req, res, next) => {
   }
 });
 
-// ✅ Route to get messages between two users
+//  Route to get messages between two users
 router.get("/:senderId/:receiverId", validateObjectIds, getMessages);
 
-// ✅ Route to get all conversations for a user with unique chat partners
+//  Route to get all conversations for a user with unique chat partners
 router.get("/conversations/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -144,7 +144,7 @@ router.get("/conversations/:userId", async (req, res) => {
   }
 });
 
-// ✅ Route to get chat list for a user
+//  Route to get chat list for a user
 router.get("/chatlist/:userId", async (req, res) => {
   try {
     await getChatList(req, res);

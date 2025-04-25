@@ -3,13 +3,13 @@ const User = require("../models/userModel");
 const Event = require("../models/eventModel");
 const mongoose = require("mongoose");
 
-// ✅ Controller to create an event message & emit it in real-time
+//  Controller to create an event message & emit it in real-time
 const createEventMessage = async (req, res) => {
   try {
-    console.log("📩 Incoming request body:", req.body); // ✅ Debugging log
+    console.log(" Incoming request body:", req.body); //  Debugging log
 
     let { userId, eventId, actionType } = req.body; // Accept actionType
-    const io = req.app.get("io"); // ✅ Get the socket instance from Express
+    const io = req.app.get("io"); //  Get the socket instance from Express
 
     if (!userId || !eventId || !actionType) {
       return res.status(400).json({
@@ -18,7 +18,7 @@ const createEventMessage = async (req, res) => {
       });
     }
 
-    // ✅ Convert to ObjectId if needed
+    //  Convert to ObjectId if needed
     if (
       !mongoose.Types.ObjectId.isValid(userId) ||
       !mongoose.Types.ObjectId.isValid(eventId)
@@ -31,7 +31,7 @@ const createEventMessage = async (req, res) => {
     userId = new mongoose.Types.ObjectId(userId);
     eventId = new mongoose.Types.ObjectId(eventId);
 
-    // ✅ Check if user & event exist
+    //  Check if user & event exist
     const user = await User.findById(userId);
     const event = await Event.findById(eventId);
 
@@ -44,7 +44,7 @@ const createEventMessage = async (req, res) => {
         .json({ success: false, error: "Event not found." });
     }
 
-    // ✅ Construct message based on actionType
+    //  Construct message based on actionType
     let message;
     if (actionType === "create") {
       message = `${user.name} created the event "${event.title}"`;
@@ -57,11 +57,11 @@ const createEventMessage = async (req, res) => {
       });
     }
 
-    // ✅ Create and save the event message
+    //  Create and save the event message
     const newMessage = new EventMessage({ userId, eventId, message });
     await newMessage.save();
 
-    // ✅ Check if saved successfully
+    //  Check if saved successfully
     const savedMessage = await EventMessage.findById(newMessage._id);
     if (!savedMessage) {
       console.error("❌ Failed to save event message in DB.");
@@ -71,9 +71,9 @@ const createEventMessage = async (req, res) => {
       });
     }
 
-    console.log("✅ Event message created:", savedMessage);
+    console.log(" Event message created:", savedMessage);
 
-    // ✅ Emit real-time message to all connected users
+    //  Emit real-time message to all connected users
     io.emit("newEventMessage", {
       _id: savedMessage._id,
       message: savedMessage.message,
@@ -93,7 +93,7 @@ const createEventMessage = async (req, res) => {
   }
 };
 
-// ✅ Controller to get all event messages with expiration filter
+//  Controller to get all event messages with expiration filter
 const getAllEventMessages = async (req, res) => {
   try {
     const currentTime = new Date();
@@ -109,10 +109,10 @@ const getAllEventMessages = async (req, res) => {
       .lean();
 
     if (!messages.length) {
-      return res.status(200).json({ success: true, messages: [] }); // ✅ Return empty array with 200 status
+      return res.status(200).json({ success: true, messages: [] }); //  Return empty array with 200 status
     }
 
-    console.log(`✅ Retrieved ${messages.length} event messages.`);
+    console.log(` Retrieved ${messages.length} event messages.`);
     res.status(200).json({ success: true, messages });
   } catch (error) {
     console.error("❌ Error fetching all event messages:", error);

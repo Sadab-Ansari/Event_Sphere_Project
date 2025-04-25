@@ -7,6 +7,6 @@ const {
 const router = express.Router();
 
 router.post("/generate", generateImage);
-router.get("/images", getAllImages); // ✅ Ensure getAllImages is correctly referenced
+router.get("/images", getAllImages); //  Ensure getAllImages is correctly referenced
 
 module.exports = router;

@@ -20,24 +20,24 @@ if (!globalThis.socket) {
   const socket = globalThis.socket;
 
   socket.on("connect", () =>
-    console.log(`✅ Connected to WebSocket: ${socket.id}`)
+    console.log(` Connected to WebSocket: ${socket.id}`)
   );
 
   socket.on("connect_error", (err) =>
-    console.error("❌ WebSocket error:", err.message)
+    console.error(" WebSocket error:", err.message)
   );
 
   socket.on("disconnect", (reason) =>
-    console.warn("⚠️ WebSocket disconnected:", reason)
+    console.warn(" WebSocket disconnected:", reason)
   );
 
   // Debugging logs (only for development)
   if (process.env.NODE_ENV === "development") {
     socket.on("reconnect_attempt", (attempt) =>
-      console.log(`🔄 Reconnecting to WebSocket... Attempt ${attempt}`)
+      console.log(` Reconnecting to WebSocket... Attempt ${attempt}`)
     );
     socket.on("reconnect_failed", () =>
-      console.warn("❌ WebSocket reconnection failed")
+      console.warn(" WebSocket reconnection failed")
     );
   }
 }

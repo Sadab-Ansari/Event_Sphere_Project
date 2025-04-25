@@ -10,7 +10,8 @@ export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:5000"); // Update with your backend URL
+    const newSocket = io(process.env.NEXT_PUBLIC_API_URL);
+    // Update with your backend URL
     setSocket(newSocket);
 
     return () => newSocket.disconnect();

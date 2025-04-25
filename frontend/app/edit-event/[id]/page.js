@@ -31,7 +31,9 @@ const EditEventPage = () => {
 
     const fetchEvent = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/events/${id}`);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${id}`
+        );
         if (!response.ok) {
           throw new Error(
             `API Error: ${response.status} ${response.statusText}`
@@ -90,7 +92,7 @@ const EditEventPage = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/events/update/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/update/${id}`,
         {
           method: "PUT",
           headers: {
@@ -154,7 +156,7 @@ const EditEventPage = () => {
             />
             {event.banner && (
               <img
-                src={`http://localhost:5000${event.banner}`}
+                src={`${process.env.NEXT_PUBLIC_API_URL}${event.banner}`}
                 alt="Current banner"
                 className="mt-2 w-full h-32 object-cover rounded-lg"
               />

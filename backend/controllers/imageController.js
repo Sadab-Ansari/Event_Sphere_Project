@@ -6,7 +6,7 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-// ✅ Generate Image using Replicate Stable Diffusion
+//  Generate Image using Replicate Stable Diffusion
 const generateImage = async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -15,7 +15,7 @@ const generateImage = async (req, res) => {
       return res.status(400).json({ error: "Prompt is required" });
     }
 
-    // ✅ Use the correct model path for Stable Diffusion
+    //  Use the correct model path for Stable Diffusion
     const output = await replicate.run(
       "stability-ai/stable-diffusion-xl:latest", // Correct model name
       {
@@ -29,7 +29,7 @@ const generateImage = async (req, res) => {
 
     const imageUrl = output[0]; // Extract the generated image URL
 
-    // ✅ Save to MongoDB
+    //  Save to MongoDB
     const newImage = new Image({ prompt, imageUrl });
     await newImage.save();
 
@@ -42,7 +42,7 @@ const generateImage = async (req, res) => {
   }
 };
 
-// ✅ Fetch All Generated Images
+//  Fetch All Generated Images
 const getAllImages = async (req, res) => {
   try {
     const images = await Image.find().sort({ createdAt: -1 });
@@ -53,5 +53,5 @@ const getAllImages = async (req, res) => {
   }
 };
 
-// ✅ Export functions
+//  Export functions
 module.exports = { generateImage, getAllImages };

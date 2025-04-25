@@ -11,9 +11,14 @@ const UpcomingEvent = () => {
   useEffect(() => {
     const fetchNearestEvent = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/events/nearest", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/events/nearest`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         if (!res.ok) {
           throw new Error("Failed to fetch nearest event");

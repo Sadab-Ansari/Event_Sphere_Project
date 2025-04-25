@@ -35,16 +35,19 @@ const Signup = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name, // ✅ Ensure name is included
-          email: formData.email, // ✅ Ensure email is included
-          password: formData.password, // ✅ Ensure password is included
-          code: formData.code, // ✅ Ensure code is included
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name, //  Ensure name is included
+            email: formData.email, //  Ensure email is included
+            password: formData.password, //  Ensure password is included
+            code: formData.code, //  Ensure code is included
+          }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -67,11 +70,14 @@ const Signup = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/send-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/send-code`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -181,7 +187,7 @@ const Signup = () => {
           </div>
           <button
             type="button"
-            onClick={handleSendCode} // ✅ This calls the function
+            onClick={handleSendCode} //  This calls the function
             className="px-4 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition font-semibold"
           >
             Send code

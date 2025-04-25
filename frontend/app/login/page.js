@@ -22,17 +22,19 @@ const Login = () => {
     setSuccessMessage("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
-        // Store token & userId in localStorage
         localStorage.setItem("token", data.token);
-        localStorage.setItem("userId", data.user._id); // ✅ FIXED
+        localStorage.setItem("userId", data.user._id);
 
         setSuccessMessage(
           "You have successfully logged in. Redirecting to dashboard..."
@@ -52,19 +54,16 @@ const Login = () => {
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-900 text-white px-6">
       <h1 className="text-4xl font-extrabold text-blue-500 mb-6">Login</h1>
 
-      {/* Info Text */}
       <p className="text-gray-400 text-sm mb-8 text-center leading-relaxed">
         Only login via email, Google, or +86 phone number <br />
         login is supported in your region.
       </p>
 
-      {/* Error & Success Messages */}
       {error && <p className="text-red-500 text-center mb-3">{error}</p>}
       {successMessage && (
         <p className="text-green-500 text-center mb-3">{successMessage}</p>
       )}
 
-      {/* Login Form */}
       <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm">
         <div className="relative">
           <FaUser className="absolute left-4 top-3.5 text-gray-400" size={18} />
@@ -98,7 +97,6 @@ const Login = () => {
           </button>
         </div>
 
-        {/* Terms & Conditions */}
         <div className="flex items-center space-x-3 text-gray-400 text-sm">
           <input
             type="checkbox"
@@ -118,7 +116,6 @@ const Login = () => {
           </label>
         </div>
 
-        {/* Login Button */}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition font-semibold"
@@ -127,7 +124,6 @@ const Login = () => {
         </button>
       </form>
 
-      {/* Forgot Password & Sign Up */}
       <div className="flex justify-between text-sm mt-6 text-gray-400 w-full max-w-sm">
         <a href="#" className="hover:underline">
           Forgot password?
@@ -137,18 +133,16 @@ const Login = () => {
         </a>
       </div>
 
-      {/* Divider */}
       <div className="flex items-center my-6 w-full max-w-sm">
         <div className="flex-grow h-px bg-gray-600"></div>
         <span className="px-4 text-gray-400 text-sm">OR</span>
         <div className="flex-grow h-px bg-gray-600"></div>
       </div>
 
-      {/* Google Login Button */}
       <button
         type="button"
         onClick={() =>
-          (window.location.href = "http://localhost:5000/api/auth/google")
+          (window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`)
         }
         className="w-full max-w-sm bg-gray-800 text-white p-4 rounded-xl flex items-center justify-center space-x-3 hover:bg-gray-700 transition font-semibold"
       >

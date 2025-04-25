@@ -106,23 +106,23 @@ const registerForEvent = async (req, res) => {
       (p) => p.user.toString() === req.user.id
     );
 
-    // Handle interests
     const userInterests =
       typeof interests === "string"
         ? interests.split(",").map((i) => i.trim())
         : interests || [];
 
+    // Prevent re-registration
     if (existingParticipant) {
-      existingParticipant.interests = [
-        ...new Set([...existingParticipant.interests, ...userInterests]),
-      ];
-    } else {
-      event.participants.push({ user: req.user.id, interests: userInterests });
+      return res
+        .status(400)
+        .json({ error: "You are already registered for this event." });
     }
 
+    // Register new participant
+    event.participants.push({ user: req.user.id, interests: userInterests });
     await event.save();
 
-    // Create a message when the user participates in the event
+    // Log message
     const message = `${user.name} participated in the event "${event.title}"`;
     const newEventMessage = new EventMessage({
       userId: req.user.id,
@@ -131,7 +131,7 @@ const registerForEvent = async (req, res) => {
     });
     await newEventMessage.save();
 
-    // Optionally, emit the event message (if using Socket.io for real-time updates)
+    // Emit real-time message
     const io = req.app.get("io");
     io.emit("newEventMessage", {
       _id: newEventMessage._id,

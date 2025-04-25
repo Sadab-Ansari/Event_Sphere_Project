@@ -17,7 +17,7 @@ const Profile = () => {
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/user/profile", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then((res) => {
@@ -52,7 +52,7 @@ const Profile = () => {
   };
 
   const handleSave = () => {
-    fetch("http://localhost:5000/api/user/profile", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -69,9 +69,15 @@ const Profile = () => {
   };
 
   const handleRemoveProfilePic = async () => {
+    // Optimistically update UI
+    setUser((prevUser) => ({
+      ...prevUser,
+      profilePic: "",
+    }));
+
     try {
       const response = await fetch(
-        "http://localhost:5000/api/user/profile/remove-picture",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/user/profile/remove-picture`,
         {
           method: "DELETE",
           headers: {
@@ -80,24 +86,29 @@ const Profile = () => {
         }
       );
 
-      if (response.ok) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          profilePic: "",
-        }));
-      } else {
+      if (!response.ok) {
         const data = await response.json();
         console.error("Error:", data.message);
+        // If the request fails, revert the profile picture back to the previous state
+        setUser((prevUser) => ({
+          ...prevUser,
+          profilePic: prevUser.profilePic, // Revert the previous profile picture
+        }));
       }
     } catch (error) {
       console.error("Error removing profile picture:", error);
+      // If there's an error in the request, revert the profile picture
+      setUser((prevUser) => ({
+        ...prevUser,
+        profilePic: prevUser.profilePic,
+      }));
     }
   };
 
   const handleDeleteEvent = async (eventId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/events/delete/${eventId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/delete/${eventId}`,
         {
           method: "DELETE",
           headers: {
@@ -119,7 +130,7 @@ const Profile = () => {
   const handleWithdraw = async (eventId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/events/withdraw/${eventId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/withdraw/${eventId}`,
         {
           method: "POST",
           headers: {
@@ -141,7 +152,7 @@ const Profile = () => {
   const handleRemoveParticipant = async (eventId, userId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/events/remove-participant/${eventId}/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/events/remove-participant/${eventId}/${userId}`,
         {
           method: "DELETE",
           headers: {

@@ -25,14 +25,14 @@ const ProfileCard = ({
   const [loading, setLoading] = useState(true);
   const [profilePic, setProfilePic] = useState(
     user?.profilePic
-      ? `http://localhost:5000${user.profilePic}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}${user.profilePic}`
       : "/default-profile.jpg"
   );
   const [isEditingPhoto, setIsEditingPhoto] = useState(false);
 
   // Fetch Events
   useEffect(() => {
-    fetch("http://localhost:5000/api/user/profile/events", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile/events`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then((res) => res.json())
@@ -55,15 +55,22 @@ const ProfileCard = ({
       formData.append("profilePic", file);
 
       try {
-        const response = await fetch("http://localhost:5000/api/user/profile", {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          body: formData,
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: formData,
+          }
+        );
 
         const data = await response.json();
         if (response.ok) {
-          setProfilePic(`http://localhost:5000${data.user.profilePic}`);
+          setProfilePic(
+            `${process.env.NEXT_PUBLIC_API_URL}${data.user.profilePic}`
+          );
           setUser((prevUser) => ({
             ...prevUser,
             profilePic: data.user.profilePic, // ✅ Now setUser is defined
@@ -78,7 +85,7 @@ const ProfileCard = ({
   useEffect(() => {
     setProfilePic(
       user?.profilePic
-        ? `http://localhost:5000${user.profilePic}`
+        ? `${process.env.NEXT_PUBLIC_API_URL}${user.profilePic}`
         : "/default-profile.jpg"
     );
   }, [user?.profilePic]); // ✅ Update profile pic when user data changes
@@ -95,7 +102,6 @@ const ProfileCard = ({
     <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg text-center">
       <h2 className="text-3xl font-bold text-gray-800 mb-4">My Profile</h2>
 
-      {/* Profile Picture */}
       {/* Profile Picture */}
       <div className="relative flex justify-center group">
         <div className="relative w-40 h-40">

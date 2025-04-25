@@ -6,10 +6,10 @@ const {
 
 const router = express.Router();
 
-// ✅ Route to create an event message
+//  Route to create an event message
 router.post("/messages", createEventMessage);
 
-// ✅ Route to get all event messages
+//  Route to get all event messages
 router.get("/all", getAllEventMessages);
 
 module.exports = router;

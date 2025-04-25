@@ -9,9 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.1.2",
     "axios": "^1.8.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.4.5",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.483.0",
     "next": "15.1.6",
     "next-auth": "^4.24.11",
@@ -20,7 +24,9 @@
     "react-draggable": "^4.4.5",
     "react-icons": "^5.4.0",
     "recharts": "^2.15.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "tailwind-merge": "^3.0.2",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

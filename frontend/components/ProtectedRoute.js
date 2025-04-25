@@ -4,21 +4,22 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token =
+      typeof window !== "undefined" && localStorage.getItem("token");
 
     if (!token) {
-      router.push("/login"); // Redirect to login if no token
+      router.replace("/login"); // Use replace to prevent going back
     } else {
-      setIsAuthenticated(true);
+      setIsCheckingAuth(false);
     }
   }, []);
 
-  if (!isAuthenticated) {
-    return null; // Prevents flashing of protected content before redirect
+  if (isCheckingAuth) {
+    return null; // Optionally add a loading spinner here
   }
 
   return <>{children}</>;
