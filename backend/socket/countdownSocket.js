@@ -5,7 +5,7 @@ const setupCountdownSocket = (io) => {
   console.log(" Countdown socket initialized");
 
   io.on("connection", async (socket) => {
-    console.log(" User connected to countdown socket");
+    // console.log(" User connected to countdown socket");
 
     // Function to emit countdown for the nearest event
     const emitNearestEventCountdown = async (userId) => {

@@ -18,7 +18,7 @@ const ProfileCard = ({
   handleChange,
   handleSave,
   handleDeleteEvent,
-  handleRemoveProfilePic, // ✅ Receive as prop from Profile.js
+  handleRemoveProfilePic, //  Receive as prop from Profile.js
 }) => {
   const [organizedEvents, setOrganizedEvents] = useState([]);
   const [participatedEvents, setParticipatedEvents] = useState([]);
@@ -73,7 +73,7 @@ const ProfileCard = ({
           );
           setUser((prevUser) => ({
             ...prevUser,
-            profilePic: data.user.profilePic, // ✅ Now setUser is defined
+            profilePic: data.user.profilePic, //  Now setUser is defined
           }));
         }
       } catch (error) {
@@ -88,7 +88,7 @@ const ProfileCard = ({
         ? `${process.env.NEXT_PUBLIC_API_URL}${user.profilePic}`
         : "/default-profile.jpg"
     );
-  }, [user?.profilePic]); // ✅ Update profile pic when user data changes
+  }, [user?.profilePic]); //  Update profile pic when user data changes
 
   // Handle Save with Reset
   const handleSaveWithReset = () => {
@@ -123,7 +123,7 @@ const ProfileCard = ({
         {/* Add/Change/Remove Photo Options */}
         {isEditingPhoto && (
           <div className="absolute bottom-12 right-6 flex flex-col items-center space-y-2 bg-white p-3 rounded-lg shadow-md">
-            {/* ✅ Show "Add Photo" only when there's no profile picture */}
+            {/*  Show "Add Photo" only when there's no profile picture */}
             {!user?.profilePic || user.profilePic === "/default-profile.jpg" ? (
               <label
                 htmlFor="profilePic"
@@ -133,7 +133,7 @@ const ProfileCard = ({
               </label>
             ) : (
               <>
-                {/* ✅ Show "Change Photo" only when a profile picture exists */}
+                {/*  Show "Change Photo" only when a profile picture exists */}
                 <label
                   htmlFor="profilePic"
                   className="text-gray-700 hover:text-cyan-700 cursor-pointer flex items-center gap-2"
@@ -141,7 +141,7 @@ const ProfileCard = ({
                   <FaUserEdit /> <span>Change Photo</span>
                 </label>
 
-                {/* ✅ Show "Remove Photo" only when a profile picture exists */}
+                {/*  Show "Remove Photo" only when a profile picture exists */}
                 <button
                   onClick={handleRemoveProfilePic}
                   className="text-red-600 hover:text-red-800 flex items-center gap-2"

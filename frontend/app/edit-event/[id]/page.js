@@ -19,7 +19,7 @@ const EditEventPage = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // ✅ Success message state
+  const [successMessage, setSuccessMessage] = useState(""); //  Success message state
 
   useEffect(() => {
     if (!id) {
@@ -214,7 +214,7 @@ const EditEventPage = () => {
           />
         </div>
 
-        {/* ✅ Show success message when event is updated */}
+        {/*  Show success message when event is updated */}
         {successMessage && (
           <div className="mb-6 p-3 bg-green-500/10 text-green-500 rounded-lg text-center">
             {successMessage} Redirecting...

@@ -22,6 +22,7 @@ const OrganizeEvent = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [createdEvent, setCreatedEvent] = useState(false); // Track if the event was successfully created
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -82,6 +83,7 @@ const OrganizeEvent = () => {
       const data = await response.json();
       if (response.ok) {
         setSuccessMessage("Event created successfully!");
+        setCreatedEvent(true); // Set the created event flag to true
         setFormData({
           title: "",
           date: "",
@@ -110,7 +112,14 @@ const OrganizeEvent = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-900 text-white px-6 pb-6">
+    <div
+      className="min-h-screen flex flex-col justify-center items-center bg-gray-900 text-white px-6 pb-6"
+      style={{
+        backgroundImage: createdEvent
+          ? "url('/images/celb.gif')" // Replace with your GIF URL
+          : "none", // No background until the event is created
+      }}
+    >
       <h1 className="text-4xl font-extrabold text-blue-500 mb-6">
         Organize Event
       </h1>

@@ -13,7 +13,7 @@ const setupSocket = (server) => {
   const onlineUsers = new Map(); // Track userId → socket.id
 
   io.on("connection", (socket) => {
-    console.log(` User connected: ${socket.id}`);
+    // console.log(` User connected: ${socket.id}`);
 
     // 📌 When a user joins, remove their old socket ID if present
     socket.on("joinRoom", (userId) => {
@@ -32,7 +32,7 @@ const setupSocket = (server) => {
 
       onlineUsers.set(userId, socket.id);
       socket.join(userId);
-      console.log(`📢 User ${userId} joined room.`);
+      console.log(` User ${userId} joined room.`);
 
       io.emit("updateOnlineUsers", Array.from(onlineUsers.keys()));
     });
