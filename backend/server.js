@@ -62,7 +62,9 @@ const progressRoutes = require("./routes/progressRoutes");
 const eventMessageRoutes = require("./routes/eventMessageRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const imageRoutes = require("./routes/imageRoutes"); //  Added image routes
+const statsRoutes = require("./routes/statsRoutes");
 
+app.use("/api", statsRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/eventMessage", eventMessageRoutes); //  Updated event message route
 app.use("/api/auth", authRoutes);

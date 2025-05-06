@@ -82,7 +82,7 @@ const OrganizeEvent = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setSuccessMessage("Event created successfully!");
+        // setSuccessMessage("Event created successfully!");
         setCreatedEvent(true); // Set the created event flag to true
         setFormData({
           title: "",

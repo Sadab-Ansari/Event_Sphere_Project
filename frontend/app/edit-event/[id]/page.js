@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const EditEventPage = () => {
   const { id } = useParams();
@@ -135,115 +136,123 @@ const EditEventPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-800 p-6">
-      <h1 className="text-4xl font-bold text-center text-blue-400 mb-8">
-        Edit Event
-      </h1>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-800 p-6">
+        <h1 className="text-4xl font-bold text-center text-blue-400 mb-8">
+          Edit Event
+        </h1>
 
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-2xl mx-auto bg-gray-700 p-8 rounded-lg shadow-lg"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="space-y-2">
-            <label className="block text-white font-medium">Event Banner</label>
-            <input
-              type="file"
-              name="banner"
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
-              accept="image/*"
-            />
-            {event.banner && (
-              <img
-                src={`${process.env.NEXT_PUBLIC_API_URL}${event.banner}`}
-                alt="Current banner"
-                className="mt-2 w-full h-32 object-cover rounded-lg"
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-2xl mx-auto bg-gray-700 p-8 rounded-lg shadow-lg"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="space-y-2">
+              <label className="block text-white font-medium">
+                Event Banner
+              </label>
+              <input
+                type="file"
+                name="banner"
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
+                accept="image/*"
               />
-            )}
+              {event.banner && (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_API_URL}${event.banner}`}
+                  alt="Current banner"
+                  className="mt-2 w-full h-32 object-cover rounded-lg"
+                />
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-white font-medium">
+                Event Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={event.title}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-white font-medium">Event Date</label>
+              <input
+                type="date"
+                name="date"
+                value={event.date}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-white font-medium">Event Title</label>
+          <div className="mb-6 space-y-2">
+            <label className="block text-white font-medium">
+              Event Location
+            </label>
             <input
               type="text"
-              name="title"
-              value={event.title}
+              name="location"
+              value={event.location}
               onChange={handleChange}
               className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-white font-medium">Event Date</label>
-            <input
-              type="date"
-              name="date"
-              value={event.date}
+          <div className="mb-6 space-y-2">
+            <label className="block text-white font-medium">
+              Event Description
+            </label>
+            <textarea
+              name="description"
+              value={event.description}
               onChange={handleChange}
               className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
+              rows="5"
               required
             />
           </div>
-        </div>
 
-        <div className="mb-6 space-y-2">
-          <label className="block text-white font-medium">Event Location</label>
-          <input
-            type="text"
-            name="location"
-            value={event.location}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
+          {/*  Show success message when event is updated */}
+          {successMessage && (
+            <div className="mb-6 p-3 bg-green-500/10 text-green-500 rounded-lg text-center">
+              {successMessage} Redirecting...
+            </div>
+          )}
 
-        <div className="mb-6 space-y-2">
-          <label className="block text-white font-medium">
-            Event Description
-          </label>
-          <textarea
-            name="description"
-            value={event.description}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
-            rows="5"
-            required
-          />
-        </div>
+          {error && (
+            <div className="mb-6 p-3 bg-red-500/10 text-red-500 rounded-lg">
+              {error}
+            </div>
+          )}
 
-        {/*  Show success message when event is updated */}
-        {successMessage && (
-          <div className="mb-6 p-3 bg-green-500/10 text-green-500 rounded-lg text-center">
-            {successMessage} Redirecting...
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-6 py-2 text-white bg-gray-600 hover:bg-gray-700 rounded-lg transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+            >
+              Update Event
+            </button>
           </div>
-        )}
-
-        {error && (
-          <div className="mb-6 p-3 bg-red-500/10 text-red-500 rounded-lg">
-            {error}
-          </div>
-        )}
-
-        <div className="flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-6 py-2 text-white bg-gray-600 hover:bg-gray-700 rounded-lg transition"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition"
-          >
-            Update Event
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </ProtectedRoute>
   );
 };
 
