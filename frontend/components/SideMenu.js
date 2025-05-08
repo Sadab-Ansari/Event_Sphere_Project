@@ -54,7 +54,7 @@ export default function SidebarMenu() {
     router.push("/login");
   };
 
-  if (["/dashboard", "/", "/login", "/signup"].includes(pathname)) return null;
+  if (["/dashboard", "/login", "/signup"].includes(pathname)) return null;
 
   return (
     <div className="relative">

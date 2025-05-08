@@ -30,4 +30,4 @@ export default function FlipBox() {
     </div>
   );
 }
-`$(process.env.NEXT_PUBLIC_API_URL)/api/traffic/data`
+`$(process.env.NEXT_PUBLIC_API_URL)/api/traffic/data`;
