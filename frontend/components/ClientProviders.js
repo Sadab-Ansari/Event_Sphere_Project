@@ -21,7 +21,7 @@ export default function ClientProviders({ children }) {
 
     // Trigger loader on route change
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 2000); // 2s on every navigation
+    const timeout = setTimeout(() => setLoading(false), 1000); // 2s on every navigation
     return () => clearTimeout(timeout);
   }, [pathname]);
 

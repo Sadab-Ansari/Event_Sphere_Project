@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Import useRouter for redirection
+import { useRouter } from "next/navigation";
+import LocationModal from "@/components/LocationModal";
 
 const OrganizeEvent = () => {
-  const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
-  const router = useRouter(); // Initialize the router for redirection
+  const today = new Date().toISOString().split("T")[0];
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -17,16 +18,17 @@ const OrganizeEvent = () => {
     maxParticipants: "",
     banner: null,
     interests: "",
+    organizerEmail: "",
   });
 
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [createdEvent, setCreatedEvent] = useState(false); // Track if the event was successfully created
+  const [createdEvent, setCreatedEvent] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // modal state
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
-
     if (type === "file") {
       setFormData({ ...formData, [name]: files[0] });
     } else {
@@ -58,6 +60,7 @@ const OrganizeEvent = () => {
     eventData.append("date", formData.date);
     eventData.append("time", formData.time);
     eventData.append("location", formData.location);
+    eventData.append("organizerEmail", formData.organizerEmail);
     eventData.append("description", formData.description);
     eventData.append("maxParticipants", formData.maxParticipants);
     if (formData.banner) {
@@ -82,8 +85,7 @@ const OrganizeEvent = () => {
 
       const data = await response.json();
       if (response.ok) {
-        // setSuccessMessage("Event created successfully!");
-        setCreatedEvent(true); // Set the created event flag to true
+        setCreatedEvent(true);
         setFormData({
           title: "",
           date: "",
@@ -94,12 +96,12 @@ const OrganizeEvent = () => {
           maxParticipants: "",
           banner: null,
           interests: "",
+          organizerEmail: "",
         });
 
-        // Redirect to the newly created event page after creation
         setTimeout(() => {
-          router.push("/events"); // Assuming `eventId` is returned from the API
-        }, 2000); // Redirect after 2 seconds
+          router.push("/events");
+        }, 2000);
       } else {
         setError(data.message || "Failed to create event");
       }
@@ -115,9 +117,7 @@ const OrganizeEvent = () => {
     <div
       className="min-h-screen flex flex-col justify-center items-center bg-gray-900 text-white px-6 pb-6"
       style={{
-        backgroundImage: createdEvent
-          ? "url('/images/celb.gif')" // Replace with your GIF URL
-          : "none", // No background until the event is created
+        backgroundImage: createdEvent ? "url('/images/celb.gif')" : "none",
       }}
     >
       <h1 className="text-4xl font-extrabold text-blue-500 mb-6">
@@ -141,11 +141,19 @@ const OrganizeEvent = () => {
           name="date"
           value={formData.date}
           onChange={handleChange}
-          min={today} // Prevent past dates
+          min={today}
           className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
-
+        <input
+          type="email"
+          name="organizerEmail"
+          value={formData.organizerEmail}
+          onChange={handleChange}
+          placeholder="Enter email for communication"
+          required
+          className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
         <div className="flex space-x-2">
           <input
             type="time"
@@ -165,15 +173,27 @@ const OrganizeEvent = () => {
           </select>
         </div>
 
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={formData.location}
-          onChange={handleChange}
-          className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
+        {/* Location input with icon */}
+        <div className="relative">
+          <input
+            type="text"
+            name="location"
+            placeholder="Location"
+            value={formData.location}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="absolute right-4 top-4 text-blue-500 text-xl"
+            title="Pick location on map"
+          >
+            📍
+          </button>
+        </div>
+
         <textarea
           name="description"
           placeholder="Event Description"
@@ -208,7 +228,6 @@ const OrganizeEvent = () => {
           required
         />
 
-        {/* Success Message directly above the Create Event button */}
         {successMessage && (
           <p className="text-green-500 text-center mb-4">{successMessage}</p>
         )}
@@ -225,6 +244,15 @@ const OrganizeEvent = () => {
           {isLoading ? "Creating..." : "Create Event"}
         </button>
       </form>
+
+      {/* Location Modal */}
+      <LocationModal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        onLocationSelect={(coords) => {
+          setFormData({ ...formData, location: coords });
+        }}
+      />
     </div>
   );
 };

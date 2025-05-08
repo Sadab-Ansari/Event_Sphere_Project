@@ -1,3 +1,9 @@
+// Function to validate email format
+const isValidEmail = (email) => {
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return regex.test(email);
+};
+
 const fs = require("fs");
 const path = require("path");
 const Event = require("../models/eventModel");
@@ -17,12 +23,13 @@ const createEvent = async (req, res) => {
       capacity,
       interests,
       category,
+      organizerEmail, // Extract the new field
     } = req.body;
 
-    if (!title || !date || !location || !time) {
-      return res
-        .status(400)
-        .json({ error: "Title, date, location, and time are required!" });
+    if (!title || !date || !location || !time || !organizerEmail) {
+      return res.status(400).json({
+        error: "Title, date, location, time, and organizerEmail are required!",
+      });
     }
 
     const formattedTime = moment(time, "HH:mm").format("hh:mm A");
@@ -58,6 +65,7 @@ const createEvent = async (req, res) => {
       time: formattedTime,
       capacity: capacity || 100,
       organizer: req.user.id,
+      organizerEmail, // Save the organizer's email to the database
       banner,
       ...(parsedInterests.length > 0 ? { interests: parsedInterests } : {}),
       category: category || "Other",
@@ -65,7 +73,7 @@ const createEvent = async (req, res) => {
 
     await newEvent.save();
 
-    //  Create EventMessage when an event is created
+    // Create EventMessage when an event is created
     const message = `${req.user.name} created the event "${newEvent.title}"`;
     const eventMessage = new EventMessage({
       userId: req.user.id,
@@ -75,7 +83,7 @@ const createEvent = async (req, res) => {
 
     await eventMessage.save();
 
-    //  Emit real-time event message
+    // Emit real-time event message
     const io = req.app.get("io");
     io.emit("newEventMessage", {
       _id: eventMessage._id,
@@ -301,8 +309,8 @@ const getNearestEventForUser = async (req, res) => {
     const events = await Event.find({ "participants.user": userId });
 
     if (!events.length) {
-      // console.log("No upcoming events found for user:", userId);
-      return res.status(404).json({ error: "No upcoming events found." });
+      // No upcoming events found, but returning a 200 status with null
+      return res.status(200).json(null); // or res.status(200).json({ event: null });
     }
 
     const upcomingEvents = events
@@ -329,14 +337,42 @@ const getNearestEventForUser = async (req, res) => {
       .sort((a, b) => a.eventDateTime - b.eventDateTime);
 
     if (!upcomingEvents.length) {
-      // console.log("No future events found.");
-      return res.status(404).json({ error: "No upcoming events found." });
+      return res.status(200).json(null); // No future events, returning null instead of 404
     }
 
     res.status(200).json(upcomingEvents[0]);
   } catch (error) {
     console.error("Error fetching nearest event:", error);
     res.status(500).json({ error: "Server error" });
+  }
+};
+
+const sendEmailToOrganizer = async (req, res) => {
+  try {
+    const { eventId, userEmail } = req.params; // Get event ID and user email from request params
+    const { message } = req.body; // The message to include in the email body
+
+    // Fetch the event and organizer's email
+    const event = await Event.findById(eventId).populate("organizer", "email");
+
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    const organizerEmail = event.organizer.email;
+
+    // Redirect URL to Gmail with pre-filled fields
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+      organizerEmail
+    )}&su=${encodeURIComponent(
+      `Message Regarding Event: ${event.title}`
+    )}&body=${encodeURIComponent(message)}`;
+
+    // Send the redirect URL to the frontend
+    res.status(200).json({ redirectUrl: gmailComposeUrl });
+  } catch (error) {
+    console.error("Error generating Gmail redirect:", error);
+    res.status(500).json({ error: "Error generating redirect URL" });
   }
 };
 
@@ -349,4 +385,5 @@ module.exports = {
   updateEvent,
   deleteEvent,
   getNearestEventForUser,
+  sendEmailToOrganizer,
 };

@@ -11,30 +11,37 @@ const eventSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-  }, // Tracks who created the event
+  },
+
+  organizerEmail: {
+    type: String,
+    required: true,
+  }, // New field for email communication
 
   participants: [
     {
       user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      interests: { type: [String], default: [] }, // ✅ Store multiple interests per user
+      interests: { type: [String], default: [] },
     },
-  ], // Users who joined with multiple interests
+  ],
 
   interests: { type: [String], default: undefined },
+
   category: {
     type: String,
     enum: ["Tech", "Sports", "Music", "Business", "Other"],
     default: "Other",
-  }, // Optional filtering
+  },
 
-  capacity: { type: Number, default: 100 }, // Max participants
+  capacity: { type: Number, default: 100 },
 
-  time: { type: String, required: true }, // Ensure time is stored as a string with AM/PM
+  time: { type: String, required: true },
+
   status: {
     type: String,
     enum: ["Upcoming", "Completed", "Cancelled"],
     default: "Upcoming",
-  }, // Event status
+  },
 });
 
 const Event = mongoose.model("Event", eventSchema);

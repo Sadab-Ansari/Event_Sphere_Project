@@ -66,7 +66,7 @@ const Login = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm">
         <div className="relative">
-          <FaUser className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <FaUser className="absolute left-4 top-5 text-gray-400" size={18} />
           <input
             type="email"
             name="email"
@@ -78,7 +78,7 @@ const Login = () => {
           />
         </div>
         <div className="relative">
-          <FaLock className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <FaLock className="absolute left-4 top-5 text-gray-400" size={18} />
           <input
             type={showPassword ? "text" : "password"}
             name="password"
@@ -91,7 +91,7 @@ const Login = () => {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-3.5 text-gray-400"
+            className="absolute right-4 top-5 text-gray-400"
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>

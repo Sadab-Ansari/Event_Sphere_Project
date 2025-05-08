@@ -57,7 +57,7 @@ const setupCountdownSocket = (io) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(" User disconnected from countdown socket");
+      // console.log(" User disconnected from countdown socket");
     });
   });
 };

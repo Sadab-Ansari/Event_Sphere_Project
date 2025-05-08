@@ -81,12 +81,13 @@ const EventsPage = () => {
     }
   };
 
-  const handleChat = (organizer) => {
-    if (!userId) {
-      alert("You must be logged in to start a chat.");
+  const handleEmail = (organizerEmail) => {
+    if (!organizerEmail) {
+      alert("Organizer's email is not available.");
       return;
     }
-    router.push(`/chat/${organizer._id}`);
+    // Open the default mail client with the organizer's email pre-filled
+    window.location.href = `mailto:${organizerEmail}`;
   };
 
   const openDescriptionModal = (event) => {
@@ -174,10 +175,10 @@ const EventsPage = () => {
 
                       <div className="flex justify-center gap-4 mt-6">
                         <button
-                          onClick={() => handleChat(event.organizer)}
+                          onClick={() => handleEmail(event.organizerEmail)} // Updated to email
                           className="bg-gradient-to-tr from-green-500 to-red-400 text-white px-5 py-2 rounded-md transform transition-all duration-300 ease-in-out hover:scale-105 hover:from-green-600 hover:to-red-500 shadow-md hover:shadow-xl flex items-center gap-2"
                         >
-                          <FaComments /> Chat
+                          <FaComments /> Email
                         </button>
                         <button
                           onClick={() => handleParticipate(event)}

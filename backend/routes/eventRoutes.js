@@ -7,7 +7,8 @@ const {
   withdrawFromEvent,
   deleteEvent,
   updateEvent,
-  getNearestEventForUser, //  Import the function
+  getNearestEventForUser,
+  sendEmailToOrganizer, // Fixed import
 } = require("../controllers/eventController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -16,7 +17,7 @@ const path = require("path");
 
 const router = express.Router();
 
-//  Configure Multer for Image Uploads
+// Configure Multer for Image Uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, "../uploads");
@@ -46,7 +47,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 }).single("banner");
 
-//  Create Event (User can organize events & upload banner)
+// Create Event (User can organize events & upload banner)
 router.post("/create", authMiddleware, (req, res, next) => {
   upload(req, res, (err) => {
     if (err) {
@@ -56,32 +57,38 @@ router.post("/create", authMiddleware, (req, res, next) => {
   });
 });
 
-//  Get All Events (Anyone can access)
+// Get All Events (Anyone can access)
 router.get("/all", getEvents);
 
-//  Get Nearest Upcoming Event (Only for logged-in users)
+// Get Nearest Upcoming Event (Only for logged-in users)
 router.get("/nearest", authMiddleware, getNearestEventForUser);
 
-//  Get Single Event by ID (Anyone can access)
+// Get Single Event by ID (Anyone can access)
 router.get("/:eventId", getEventById);
 
-//  Register for an Event (Only logged-in users)
+// Register for an Event (Only logged-in users)
 router.post("/register/:eventId", authMiddleware, registerForEvent);
 
-//  Withdraw from an Event (Only logged-in users)
+// Withdraw from an Event (Only logged-in users)
 router.post("/withdraw/:eventId", authMiddleware, withdrawFromEvent);
 
-//  Allow Image Uploads in `PUT` Requests
+// Allow Image Uploads in `PUT` Requests
 router.put("/update/:eventId", authMiddleware, (req, res, next) => {
   upload(req, res, (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
+    if (!req.file) {
+      return updateEvent(req, res, next); // Continue without banner update
+    }
     updateEvent(req, res, next);
   });
 });
 
-//  Delete an Event (Only the creator or admin can delete)
+// Delete an Event (Only the creator or admin can delete)
 router.delete("/delete/:eventId", authMiddleware, deleteEvent);
+
+// Send Email to Organizer (Only logged-in users can send an email)
+router.post("/send-email/:eventId", authMiddleware, sendEmailToOrganizer);
 
 module.exports = router;

@@ -112,7 +112,7 @@ const getAllEventMessages = async (req, res) => {
       return res.status(200).json({ success: true, messages: [] }); //  Return empty array with 200 status
     }
 
-    console.log(` Retrieved ${messages.length} event messages.`);
+    // console.log(` Retrieved ${messages.length} event messages.`);
     res.status(200).json({ success: true, messages });
   } catch (error) {
     console.error("❌ Error fetching all event messages:", error);

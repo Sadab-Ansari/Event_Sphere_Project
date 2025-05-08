@@ -20,14 +20,25 @@ const UpcomingEvent = () => {
           }
         );
 
+        if (res.status === 404) {
+          // 404 is expected if no upcoming event — don't treat it as an error
+          setNearestEvent(null);
+          setError(null);
+          return;
+        }
+
         if (!res.ok) {
           throw new Error("Failed to fetch nearest event");
         }
 
         const event = await res.json();
-        console.log("Fetched Event:", event); // Debugging log
         setNearestEvent(event);
+        setError(null); // clear any previous error
       } catch (error) {
+        // Only log unexpected errors
+        if (error.message !== "Failed to fetch nearest event") {
+          console.error("Unexpected error:", error);
+        }
         setError(error.message);
       } finally {
         setLoading(false);
