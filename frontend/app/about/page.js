@@ -51,6 +51,14 @@ const About = () => {
           >
             Send an Email
           </a>
+          <a
+            href="https://github.com/Sadab-Ansari/Event_Sphere_Project"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-block bg-gray-800 text-white py-3 px-8 rounded-full hover:scale-105 transition duration-300 ml-4"
+          >
+            View on GitHub
+          </a>
         </div>
       </section>
     </div>
