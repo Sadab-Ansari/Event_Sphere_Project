@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const verificationModel = require("../models/verificationModel");
 
-// ✅ Fix: Importing functions correctly
+//  Fix: Importing functions correctly
 const { signup, login } = require("../controllers/authController");
 
 const router = express.Router();
@@ -48,36 +48,34 @@ router.post("/send-code", async (req, res) => {
     res.json({ message: "Verification code sent successfully" });
   } catch (error) {
     console.error("Error sending verification code:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to send verification code",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to send verification code",
+      error: error.message,
+    });
   }
 });
 
-// ✅ Fix: Define routes correctly
+//  Fix: Define routes correctly
 router.post("/signup", signup); // 🔥 No more "undefined" error
 router.post("/login", login);
 
-// ✅ Google Login Route
+//  Google Login Route
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// ✅ Google Callback Route
+//  Google Callback Route
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:3000/login",
+    failureRedirect: process.env.CLIENT_URL + "/login",
   }),
   (req, res) => {
     const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
-    res.redirect(`http://localhost:3000/dashboard?token=${token}`);
+    res.redirect(`${process.env.CLIENT_URL}/dashboard?token=${token}`);
   }
 );
 
