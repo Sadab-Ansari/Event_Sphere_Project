@@ -72,7 +72,10 @@ app.use("/api/user", userRoutes);
 app.use("/api/events", eventRoutes); //  Handles nearest event route
 app.use("/api/traffic", trafficRoutes);
 app.use("/api/progress", progressRoutes);
-app.use("/api/images", imageRoutes); //  Image generation route added
+app.use("/api/images", imageRoutes);
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+}); //  Image generation route added
 
 //  Catch 404 Errors (Not Found)
 app.use((req, res, next) => {
@@ -94,7 +97,7 @@ app.use((err, req, res, next) => {
     const PORT = process.env.PORT || 5000;
     server.listen(PORT, () => console.log(` Server running on port ${PORT}`));
   } catch (error) {
-    console.error("❌ MongoDB Connection Failed:", error);
+    console.error(" MongoDB Connection Failed:", error);
     process.exit(1);
   }
 })();

@@ -7,7 +7,7 @@ const fs = require("fs");
 
 const router = express.Router();
 
-// ✅ Ensure 'uploads/profile' folder exists
+//  Ensure 'uploads/profile' folder exists
 const uploadPath = path.join(__dirname, "../uploads/profile");
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });

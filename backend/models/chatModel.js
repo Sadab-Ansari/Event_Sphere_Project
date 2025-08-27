@@ -21,7 +21,7 @@ const chatSchema = new mongoose.Schema(
     },
     isRead: {
       type: Boolean,
-      default: false, // ✅ Tracks if the message has been read
+      default: false, //  Tracks if the message has been read
     },
     deleted: {
       type: Boolean,

@@ -18,7 +18,7 @@ const setupSocket = (server) => {
     // 📌 When a user joins, remove their old socket ID if present
     socket.on("joinRoom", (userId) => {
       if (!mongoose.Types.ObjectId.isValid(userId)) {
-        console.error("❌ Invalid userId format");
+        console.error(" Invalid userId format");
         return;
       }
 
