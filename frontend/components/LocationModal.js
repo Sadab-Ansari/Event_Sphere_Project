@@ -1,8 +1,27 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { useState, useEffect } from "react";
 import Modal from "react-modal";
+import dynamic from "next/dynamic";
+
+// Dynamically load react-leaflet components on client only
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
+const useMapEvents = dynamic(
+  () => import("react-leaflet").then((mod) => mod.useMapEvents),
+  { ssr: false }
+);
+
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -17,13 +36,36 @@ L.Icon.Default.mergeOptions({
 
 function LocationSelector({ onSelect }) {
   const [position, setPosition] = useState(null);
-  useMapEvents({
-    click(e) {
-      setPosition(e.latlng);
-      onSelect(e.latlng);
-    },
-  });
-  return position && <Marker position={position} />;
+
+  // react-leaflet hook must also be inside dynamic import
+  const MapEvents = dynamic(
+    () =>
+      import("react-leaflet").then((mod) =>
+        mod.useMapEvents
+          ? function Wrapper({ onClick }) {
+              mod.useMapEvents({
+                click(e) {
+                  onClick(e.latlng);
+                },
+              });
+              return null;
+            }
+          : () => null
+      ),
+    { ssr: false }
+  );
+
+  return (
+    <>
+      <MapEvents
+        onClick={(latlng) => {
+          setPosition(latlng);
+          onSelect(latlng);
+        }}
+      />
+      {position && <Marker position={position} />}
+    </>
+  );
 }
 
 export default function LocationModal({
@@ -37,8 +79,6 @@ export default function LocationModal({
       const appElement = document.getElementById("__next");
       if (appElement) {
         Modal.setAppElement(appElement);
-      } else {
-        console.warn("App element #__next not found");
       }
     }
   }, []);
@@ -48,7 +88,7 @@ export default function LocationModal({
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       contentLabel="Select Location"
-      ariaHideApp={false} // not recommended for production
+      ariaHideApp={false}
     >
       <h2>Select Event Location</h2>
       <MapContainer
