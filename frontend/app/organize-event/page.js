@@ -48,7 +48,11 @@ const OrganizeEvent = () => {
       return;
     }
 
-    const token = localStorage.getItem("token");
+    let token = null;
+    if (typeof window !== "undefined") {
+      token = localStorage.getItem("token");
+    }
+
     if (!token) {
       setError("You must be logged in to create an event.");
       setIsLoading(false);
