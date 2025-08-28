@@ -5,6 +5,8 @@
 html,
 body {
   height: 100%;
+  width: 100%;
+  overflow-x: hidden; /* prevent horizontal scroll */
 }
 
 #__next {
@@ -16,23 +18,51 @@ body {
 main {
   flex: 1;
 }
-/* @keyframes gradientAnimation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
+
+/* ================== Global Fixes ================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 1280px; /* keeps things centered on large screens */
+  margin: 0 auto;
+  padding: 1rem;
+  width: 100%;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Sidebar scaling */
+.sidebar {
+  width: 250px;
+  min-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    position: relative;
   }
 }
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradientAnimation 3s infinite linear; */
-/* } */
+/* Charts, progress circle, calendar auto-scale */
+.chart,
+.progress,
+.calendar {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
 
+/* ================== Your Existing Theme ================== */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -98,6 +128,7 @@ main {
   }
 }
 
+/* ================== Animations & Card Flip ================== */
 .perspective-1000 {
   perspective: 1000px;
 }
