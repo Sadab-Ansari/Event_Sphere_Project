@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Modal from "react-modal";
 import dynamic from "next/dynamic";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 // Dynamically load react-leaflet components on client only
 const MapContainer = dynamic(
@@ -17,13 +19,6 @@ const Marker = dynamic(
   () => import("react-leaflet").then((mod) => mod.Marker),
   { ssr: false }
 );
-const useMapEvents = dynamic(
-  () => import("react-leaflet").then((mod) => mod.useMapEvents),
-  { ssr: false }
-);
-
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
 // Fix marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -34,26 +29,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
 });
 
+// Wrapper for useMapEvents (avoids SSR issues)
+function MapEvents({ onClick }) {
+  // require here so it only runs on client
+  const { useMapEvents } = require("react-leaflet");
+  useMapEvents({
+    click(e) {
+      onClick(e.latlng);
+    },
+  });
+  return null;
+}
+
 function LocationSelector({ onSelect }) {
   const [position, setPosition] = useState(null);
-
-  // react-leaflet hook must also be inside dynamic import
-  const MapEvents = dynamic(
-    () =>
-      import("react-leaflet").then((mod) =>
-        mod.useMapEvents
-          ? function Wrapper({ onClick }) {
-              mod.useMapEvents({
-                click(e) {
-                  onClick(e.latlng);
-                },
-              });
-              return null;
-            }
-          : () => null
-      ),
-    { ssr: false }
-  );
 
   return (
     <>
@@ -73,8 +62,11 @@ export default function LocationModal({
   onRequestClose,
   onLocationSelect,
 }) {
-  // Set app element to prevent screen reader issues
+  const [isClient, setIsClient] = useState(false);
+
   useEffect(() => {
+    setIsClient(true);
+
     if (typeof window !== "undefined") {
       const appElement = document.getElementById("__next");
       if (appElement) {
@@ -82,6 +74,9 @@ export default function LocationModal({
       }
     }
   }, []);
+
+  //  Prevent rendering on server
+  if (!isClient) return null;
 
   return (
     <Modal
