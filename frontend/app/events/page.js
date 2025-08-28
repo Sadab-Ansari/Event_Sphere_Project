@@ -106,8 +106,8 @@ const EventsPage = () => {
   );
 
   return (
-    <ProtectedRoute>
-      <Suspense fallback={<div>Loading events...</div>}>
+    <Suspense fallback={<div>Loading events...</div>}>
+      <ProtectedRoute>
         <div className="bg-gray-800">
           <div className="flex min-h-screen bg-gray-900 space-x-2 md:ml-16">
             <div className="flex-1 bg-gray-800 pr-3 pb-6 pt-6 pl-3">
@@ -289,8 +289,8 @@ const EventsPage = () => {
             </div>
           </div>
         </div>
-      </Suspense>
-    </ProtectedRoute>
+      </ProtectedRoute>
+    </Suspense>
   );
 };
 
