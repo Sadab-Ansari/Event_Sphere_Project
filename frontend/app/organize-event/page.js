@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import LocationModal from "@/components/LocationModal";
+// import LocationModal from "@/components/LocationModal";
 
 const OrganizeEvent = () => {
   const today = new Date().toISOString().split("T")[0];
