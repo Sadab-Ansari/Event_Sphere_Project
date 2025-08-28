@@ -1,25 +1,27 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SocketProvider } from "@/context/SocketContext";
 import SkeletonLoader from "@/components/SkeletonLoader";
 
 export default function ClientProviders({ children }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
-  const isFirstLoad = useRef(true); // track first load
 
   useEffect(() => {
-    if (isFirstLoad.current) {
-      //  Skip loader on very first page load
-      isFirstLoad.current = false;
-      return;
-    }
-
-    //  Show loader only on navigation
+    // Trigger loader on initial load
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 1000); // adjust timing as you like
+    const timeout = setTimeout(() => setLoading(false), 1000); // 2s on initial page load
+    return () => clearTimeout(timeout);
+  }, []); // only on first load
+
+  useEffect(() => {
+    if (!pathname) return;
+
+    // Trigger loader on route change
+    setLoading(true);
+    const timeout = setTimeout(() => setLoading(false), 1000); // 2s on every navigation
     return () => clearTimeout(timeout);
   }, [pathname]);
 
