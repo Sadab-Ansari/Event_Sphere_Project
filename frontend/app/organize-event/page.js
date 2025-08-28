@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-// import LocationModal from "@/components/LocationModal";
+import LocationModal from "@/components/LocationModal";
 
 const OrganizeEvent = () => {
   const today = new Date().toISOString().split("T")[0];
@@ -48,11 +48,7 @@ const OrganizeEvent = () => {
       return;
     }
 
-    let token = null;
-    if (typeof window !== "undefined") {
-      token = localStorage.getItem("token");
-    }
-
+    const token = localStorage.getItem("token");
     if (!token) {
       setError("You must be logged in to create an event.");
       setIsLoading(false);
@@ -250,13 +246,13 @@ const OrganizeEvent = () => {
       </form>
 
       {/* Location Modal */}
-      {/* <LocationModal
+      <LocationModal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
         onLocationSelect={(coords) => {
           setFormData({ ...formData, location: coords });
         }}
-      /> */}
+      />
     </div>
   );
 };
