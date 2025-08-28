@@ -59,7 +59,7 @@ const Dashboard = () => {
             <div className="h-full rounded-lg flex flex-col justify-between space-y-3 w-full">
               <Calendar />
               <Clock />
-              <div className="relative text-3xl sm:text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md w-full max-w-xs">
+              <div className="relative text-3xl sm:text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md w-full">
                 <span className="bg-black bg-clip-text text-transparent animate-gradient pb-1">
                   Date & Time
                 </span>
