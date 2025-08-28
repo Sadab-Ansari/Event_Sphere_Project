@@ -7,8 +7,8 @@ Participants can view their joined events, withdraw anytime, and stay updated th
 ---
 
 ## 🚀 Live Demo  
-- **Frontend (Vercel):** [https://your-frontend-link.vercel.app](#)  
-- **Backend API (Render):** [https://your-backend-link.onrender.com](#)  
+- **Frontend (Vercel):** [event-sphere-6q0.vercel.app](#)  
+\
 
 ---
 
@@ -46,4 +46,4 @@ This project is licensed under the **MIT License** – feel free to use and modi
 ---
 
 ## 👨‍💻 Author  
-Developed by **[Your Name]** ✨  
+Developed by **[Sadab Ansari]** ✨  
