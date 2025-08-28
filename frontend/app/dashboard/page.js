@@ -1,5 +1,5 @@
 "use client";
-// import { useEffect } from "react";
+
 import Footer1 from "./Footer1";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
@@ -14,54 +14,52 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 const Dashboard = () => {
   return (
     <ProtectedRoute>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-screen p-4 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-screen p-4 mb-8">
+        {/* Sidebar */}
         <div className="lg:col-span-2">
           <Sidebar />
         </div>
 
+        {/* Main content */}
         <div className="lg:col-span-10 flex flex-col gap-4">
-          <div>
-            <TopNav />
-          </div>
+          {/* Top Navigation */}
+          <TopNav />
 
+          {/* Dashboard Grids */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
+            {/* Left & Center Section */}
             <div className="md:col-span-2 grid gap-4">
+              {/* Upcoming Event + Traffic Chart */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-lg shadow-lg">
+                <div className="rounded-lg shadow-lg w-full">
                   <UpcomingEvent />
                 </div>
-                <div>
+                <div className="w-full">
                   <TrafficBarChart />
                 </div>
               </div>
 
+              {/* Event Messages + Progress */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="h-80 sm:col-span-2">
+                <div className="h-80 sm:col-span-2 w-full">
                   <EventMessages />
                 </div>
-                <div className="h-80 flex justify-between items-center flex-col">
-                  <div>
-                    <ProgressPieChart />
-                  </div>
-                  <div>
-                    <div className="relative text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md w-64">
-                      <span className="bg-black bg-clip-text text-transparent animate-gradient pb-1">
-                        Progress
-                      </span>
-                    </div>
+                <div className="h-80 flex flex-col justify-between items-center w-full">
+                  <ProgressPieChart />
+                  <div className="relative text-3xl sm:text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md w-full max-w-xs">
+                    <span className="bg-black bg-clip-text text-transparent animate-gradient pb-1">
+                      Progress
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="h-full rounded-lg flex flex-col md:flex md:justify-between space-y-3">
-              <div>
-                <Calendar />
-              </div>
-              <div>
-                <Clock />
-              </div>
-              <div className="relative text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md">
+            {/* Right Section */}
+            <div className="h-full rounded-lg flex flex-col justify-between space-y-3 w-full">
+              <Calendar />
+              <Clock />
+              <div className="relative text-3xl sm:text-4xl font-[Dancing Script] italic flex items-center justify-center bg-white rounded-lg shadow-md w-full max-w-xs">
                 <span className="bg-black bg-clip-text text-transparent animate-gradient pb-1">
                   Date & Time
                 </span>
@@ -69,9 +67,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div>
-            <Footer1 />
-          </div>
+          {/* Footer */}
+          <Footer1 />
         </div>
       </div>
     </ProtectedRoute>
