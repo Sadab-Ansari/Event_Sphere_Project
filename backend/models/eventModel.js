@@ -42,6 +42,13 @@ const eventSchema = new mongoose.Schema({
     enum: ["Upcoming", "Completed", "Cancelled"],
     default: "Upcoming",
   },
+
+  // Ticket Price
+  price: {
+    type: Number,
+    required: true,
+    default: 0, // Free event by default
+  },
 });
 
 const Event = mongoose.model("Event", eventSchema);

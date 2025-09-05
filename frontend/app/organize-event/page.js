@@ -19,6 +19,7 @@ const OrganizeEvent = () => {
     banner: null,
     interests: "",
     organizerEmail: "",
+    price: "", // ✅ New price field
   });
 
   const [error, setError] = useState("");
@@ -63,6 +64,7 @@ const OrganizeEvent = () => {
     eventData.append("organizerEmail", formData.organizerEmail);
     eventData.append("description", formData.description);
     eventData.append("maxParticipants", formData.maxParticipants);
+    eventData.append("price", formData.price); // ✅ send price
     if (formData.banner) {
       eventData.append("banner", formData.banner);
     }
@@ -97,6 +99,7 @@ const OrganizeEvent = () => {
           banner: null,
           interests: "",
           organizerEmail: "",
+          price: "", // reset price
         });
 
         setTimeout(() => {
@@ -202,6 +205,7 @@ const OrganizeEvent = () => {
           className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         ></textarea>
+
         <input
           type="number"
           name="maxParticipants"
@@ -211,6 +215,21 @@ const OrganizeEvent = () => {
           className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+
+        {/*Ticket Price Input */}
+        <input
+          type="number"
+          name="price"
+          placeholder="Ticket Price (₹)"
+          value={formData.price}
+          onChange={(e) =>
+            setFormData({ ...formData, price: Number(e.target.value) })
+          }
+          min="0"
+          className="w-full p-4 bg-gray-900 border border-gray-800 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+
         <input
           type="text"
           name="interests"

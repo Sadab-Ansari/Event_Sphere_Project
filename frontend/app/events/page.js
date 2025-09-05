@@ -1,11 +1,16 @@
 "use client";
-// import { Suspense } from "react";
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaComments } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { loadStripe } from "@stripe/stripe-js";
+
+// Initialize Stripe once
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+);
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
@@ -15,8 +20,8 @@ const EventsPage = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedInterest, setSelectedInterest] = useState("");
   const [showParticipationModal, setShowParticipationModal] = useState(false);
-  const [showDescriptionModal, setShowDescriptionModal] = useState(false); // New state for description modal
-  const [descriptionContent, setDescriptionContent] = useState(""); // For event description
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [descriptionContent, setDescriptionContent] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const successMessage = searchParams.get("success");
@@ -87,18 +92,51 @@ const EventsPage = () => {
       alert("Organizer's email is not available.");
       return;
     }
-    // Open the default mail client with the organizer's email pre-filled
     window.location.href = `mailto:${organizerEmail}`;
   };
 
   const openDescriptionModal = (event) => {
-    setDescriptionContent(event.description); // Set the event description
-    setShowDescriptionModal(true); // Show the modal
+    setDescriptionContent(event.description);
+    setShowDescriptionModal(true);
   };
 
   const closeDescriptionModal = () => {
-    setShowDescriptionModal(false); // Close the modal
-    setDescriptionContent(""); // Clear the description
+    setShowDescriptionModal(false);
+    setDescriptionContent("");
+  };
+
+  // Stripe Checkout
+  // Stripe Checkout
+  const handleCheckout = async (event) => {
+    try {
+      const stripe = await stripePromise;
+
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: event._id,
+          amount: event.price, // send price in ₹ directly
+        }),
+      });
+
+      const session = await response.json();
+
+      if (!session.sessionId) {
+        alert(session.error || "Stripe session creation failed");
+        return;
+      }
+
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.sessionId,
+      });
+      if (result.error) {
+        alert(result.error.message);
+      }
+    } catch (err) {
+      console.error("Stripe Checkout Error:", err);
+      alert("Failed to initiate payment. Please try again.");
+    }
   };
 
   const filteredEvents = events.filter((event) =>
@@ -174,9 +212,9 @@ const EventsPage = () => {
                         {event.location}
                       </p>
 
-                      <div className="flex justify-center gap-4 mt-6">
+                      <div className="flex flex-wrap justify-center gap-4 mt-6">
                         <button
-                          onClick={() => handleEmail(event.organizerEmail)} // Updated to email
+                          onClick={() => handleEmail(event.organizerEmail)}
                           className="bg-gradient-to-tr from-green-500 to-red-400 text-white px-5 py-2 rounded-md transform transition-all duration-300 ease-in-out hover:scale-105 hover:from-green-600 hover:to-red-500 shadow-md hover:shadow-xl flex items-center gap-2"
                         >
                           <FaComments /> Mail
@@ -186,6 +224,12 @@ const EventsPage = () => {
                           className="bg-gradient-to-tr from-blue-500 to-red-500 text-white px-5 py-2 rounded-md transform transition-all duration-300 ease-in-out hover:scale-105 hover:from-blue-600 hover:to-red-600 shadow-md hover:shadow-xl"
                         >
                           Participate
+                        </button>
+                        <button
+                          onClick={() => handleCheckout(event)}
+                          className="bg-gradient-to-tr from-purple-500 to-pink-500 text-white px-5 py-2 rounded-md transform transition-all duration-300 ease-in-out hover:scale-105 hover:from-purple-600 hover:to-pink-600 shadow-md hover:shadow-xl"
+                        >
+                          Buy Ticket
                         </button>
                       </div>
                     </div>

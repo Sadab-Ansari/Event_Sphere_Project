@@ -23,18 +23,25 @@ const createEvent = async (req, res) => {
       capacity,
       interests,
       category,
-      organizerEmail, // Extract the new field
+      organizerEmail,
+      price, // ✅ Destructure price
     } = req.body;
 
+    // Validate required fields
     if (!title || !date || !location || !time || !organizerEmail) {
       return res.status(400).json({
         error: "Title, date, location, time, and organizerEmail are required!",
       });
     }
 
+    // Format time to hh:mm AM/PM
+    const moment = require("moment");
     const formattedTime = moment(time, "HH:mm").format("hh:mm A");
+
+    // Handle banner file
     const banner = req.file ? `/uploads/${req.file.filename}` : null;
 
+    // Parse interests (supports stringified JSON or comma-separated)
     let parsedInterests = [];
     if (typeof interests === "string") {
       try {
@@ -57,6 +64,10 @@ const createEvent = async (req, res) => {
       parsedInterests = interests.filter((i) => i.trim() !== "");
     }
 
+    // Ensure price is a number
+    const numericPrice = price ? Number(price) : 0;
+
+    // Create new event
     const newEvent = new Event({
       title,
       description,
@@ -65,15 +76,17 @@ const createEvent = async (req, res) => {
       time: formattedTime,
       capacity: capacity || 100,
       organizer: req.user.id,
-      organizerEmail, // Save the organizer's email to the database
+      organizerEmail,
       banner,
+      price: numericPrice, // ✅ Store as number
       ...(parsedInterests.length > 0 ? { interests: parsedInterests } : {}),
       category: category || "Other",
     });
 
     await newEvent.save();
 
-    // Create EventMessage when an event is created
+    // Create EventMessage
+    const EventMessage = require("../models/eventMessageModel");
     const message = `${req.user.name} created the event "${newEvent.title}"`;
     const eventMessage = new EventMessage({
       userId: req.user.id,
