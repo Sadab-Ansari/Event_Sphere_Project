@@ -179,7 +179,7 @@ const EventsPage = () => {
                           onClick={() => handleEmail(event.organizerEmail)} // Updated to email
                           className="bg-gradient-to-tr from-green-500 to-red-400 text-white px-5 py-2 rounded-md transform transition-all duration-300 ease-in-out hover:scale-105 hover:from-green-600 hover:to-red-500 shadow-md hover:shadow-xl flex items-center gap-2"
                         >
-                          <FaComments /> Email
+                          <FaComments /> Mail
                         </button>
                         <button
                           onClick={() => handleParticipate(event)}

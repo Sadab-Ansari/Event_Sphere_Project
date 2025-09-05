@@ -202,7 +202,6 @@ const Signup = () => {
         </button>
       </form>
 
-      {/* Forgot Password & Login */}
       <div className="flex justify-between text-sm mt-6 text-gray-400 w-full max-w-sm">
         <a href="/login" className="hover:underline">
           Log in

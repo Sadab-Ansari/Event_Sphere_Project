@@ -1,10 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEnvelope, FaPhone, FaStar } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FaEnvelope, FaPhone, FaStar } from "react-icons/fa"; // ✅ Import necessary icons
 
 const ProfileEvent = ({
   events = [],
@@ -23,6 +22,26 @@ const ProfileEvent = ({
   }, []);
 
   if (!isClient) return null;
+
+  // ✅ Helper to check if event is upcoming
+  const isUpcoming = (event) => {
+    const eventDateTime = new Date(event.date);
+
+    if (event.time) {
+      const [time, period] = event.time.split(" ");
+      let [hours, minutes] = time.split(":").map(Number);
+
+      if (period === "PM" && hours !== 12) hours += 12;
+      if (period === "AM" && hours === 12) hours = 0;
+
+      eventDateTime.setHours(hours, minutes, 0, 0);
+    }
+
+    return eventDateTime >= new Date();
+  };
+
+  // ✅ Filter only upcoming events
+  const upcomingEvents = events.filter(isUpcoming);
 
   const fetchParticipants = async (event) => {
     if (participantsCache[event._id]) {
@@ -49,9 +68,9 @@ const ProfileEvent = ({
         {type === "organized" ? "Organized Events" : "Participated Events"}
       </h3>
 
-      {events.length > 0 ? (
+      {upcomingEvents.length > 0 ? (
         <ul className="space-y-4">
-          {events.map((event) => (
+          {upcomingEvents.map((event) => (
             <li key={event._id} className="p-4 bg-gray-800 rounded-lg">
               {/* Title and Date on the Same Line */}
               <div className="flex space-x-2 justify-center items-center">
@@ -63,7 +82,7 @@ const ProfileEvent = ({
                 </p>
               </div>
 
-              {/* Buttons Below for Organized Events */}
+              {/* Buttons for Organized Events */}
               {type === "organized" && (
                 <div className="flex gap-3 mt-3 justify-center">
                   <Link
@@ -99,7 +118,7 @@ const ProfileEvent = ({
                 </div>
               )}
 
-              {/* Withdraw Button on Right for Participated Events */}
+              {/* Withdraw Button for Participated Events */}
               {type !== "organized" && (
                 <div className="flex justify-center mt-2">
                   <button
@@ -122,16 +141,17 @@ const ProfileEvent = ({
           ))}
         </ul>
       ) : (
-        <p className="text-gray-400">No {type} events found.</p>
+        <p className="text-gray-400">No upcoming {type} events found.</p>
       )}
 
+      {/* Participants Modal */}
       {selectedEvent && (
         <motion.div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4"
-          initial={{ scale: 0, opacity: 0 }} // Starts from the center, hidden
-          animate={{ scale: 1, opacity: 1 }} // Expands smoothly to full size
-          exit={{ scale: 0, opacity: 0 }} // Shrinks back when closed
-          transition={{ type: "spring", stiffness: 100, damping: 12 }} // Smooth spring effect
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 100, damping: 12 }}
         >
           <div className="bg-gray-900 p-6 rounded-lg w-[600px] max-w-full">
             <h2 className="text-xl font-bold text-white text-center mb-4">
@@ -149,17 +169,14 @@ const ProfileEvent = ({
                       <p className="font-semibold">
                         {participant.user?.name || "N/A"}
                       </p>
-
                       <p className="text-sm text-gray-300 flex items-center gap-2">
-                        <FaEnvelope className="text-gray-400" />{" "}
+                        <FaEnvelope className="text-gray-400" />
                         {participant.user?.email || "N/A"}
                       </p>
-
                       <p className="text-sm text-gray-300 flex items-center gap-2">
-                        <FaPhone className="text-gray-400" />{" "}
+                        <FaPhone className="text-gray-400" />
                         {participant.user?.phone || "N/A"}
                       </p>
-
                       <p className="text-sm text-gray-300 flex items-center gap-2">
                         <FaStar className="text-yellow-400" /> Interest:{" "}
                         {participant.interests?.length > 0
