@@ -22,13 +22,13 @@ const Profile = () => {
     })
       .then((res) => {
         if (res.status === 401) {
-          // ✅ Token expired or invalid, force logout
+          // ken expired or invalid, force logout
           localStorage.removeItem("token");
           setUser(null);
           setFormData({});
           setOrganizedEvents([]);
           setParticipatedEvents([]);
-          window.location.href = "/login"; // ✅ Redirect to login
+          window.location.href = "/login"; // Redirect to login
         }
         return res.json();
       })

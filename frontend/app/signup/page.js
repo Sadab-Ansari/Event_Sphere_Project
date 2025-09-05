@@ -103,7 +103,7 @@ const Signup = () => {
       {/* Signup Form */}
       <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm">
         <div className="relative">
-          <FaUser className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <FaUser className="absolute left-4 top-5 text-gray-400" size={18} />
           <input
             type="text"
             name="name"
@@ -116,7 +116,7 @@ const Signup = () => {
         </div>
 
         <div className="relative">
-          <FaUser className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <FaUser className="absolute left-4 top-5 text-gray-400" size={18} />
           <input
             type="email"
             name="email"
@@ -129,7 +129,7 @@ const Signup = () => {
         </div>
 
         <div className="relative">
-          <FaLock className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <FaLock className="absolute left-4 top-5 text-gray-400" size={18} />
           <input
             type={showPassword ? "text" : "password"}
             name="password"
@@ -142,14 +142,14 @@ const Signup = () => {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-3.5 text-gray-400"
+            className="absolute right-4 top-5 text-gray-400"
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
         </div>
 
         <div className="relative">
-          <FaLock className="absolute left-4 top-3.5 text-gray-400" size={18} />
+          <FaLock className="absolute left-4 top-5 text-gray-400" size={18} />
           <input
             type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"
@@ -162,7 +162,7 @@ const Signup = () => {
           <button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-4 top-3.5 text-gray-400"
+            className="absolute right-4 top-5 text-gray-400"
           >
             {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
@@ -172,7 +172,7 @@ const Signup = () => {
         <div className="flex space-x-3">
           <div className="relative flex-grow">
             <FaHashtag
-              className="absolute left-4 top-3.5 text-gray-400"
+              className="absolute left-4 top-5 text-gray-400"
               size={18}
             />
             <input
@@ -194,27 +194,6 @@ const Signup = () => {
           </button>
         </div>
 
-        {/* Terms & Conditions */}
-        <div className="flex items-center space-x-3 text-gray-400 text-sm">
-          <input
-            type="checkbox"
-            id="terms"
-            className="accent-blue-500 w-5 h-5"
-          />
-          <label htmlFor="terms" className="leading-relaxed">
-            I confirm that I have read, consent, and agree to the{" "}
-            <a href="#" className="text-blue-400 hover:underline">
-              Terms of Use
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-blue-400 hover:underline">
-              Privacy Policy
-            </a>
-            .
-          </label>
-        </div>
-
-        {/* Signup Button */}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition font-semibold"
@@ -225,9 +204,6 @@ const Signup = () => {
 
       {/* Forgot Password & Login */}
       <div className="flex justify-between text-sm mt-6 text-gray-400 w-full max-w-sm">
-        <a href="#" className="hover:underline">
-          Forgot password?
-        </a>
         <a href="/login" className="hover:underline">
           Log in
         </a>
