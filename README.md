@@ -7,7 +7,7 @@ Participants can view their joined events, withdraw anytime, and stay updated th
 ---
 
 ## 🚀 Live Demo  
-- **Frontend (Vercel):** [event-sphere-6q0.vercel.app](#)  
+- **Frontend (Vercel):** [https://event-sphere-6q0.vercel.app](#)  
 \
 
 ---
