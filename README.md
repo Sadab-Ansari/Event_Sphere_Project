@@ -32,11 +32,13 @@ Participants can view their joined events, withdraw anytime, and stay updated th
 
 ---
 
-## 🔮 Future Improvements  
-- **Admin Dashboard** → Centralized control for managing users and events.  
+## 🔮 Future Improvements
+
+- **Admin Dashboard** → Centralized control for managing events and users.  
 - **Payment Gateway Integration** → Enable secure online payments for event registration.  
 - **Ticketing System** → Auto-generate event tickets with QR codes.  
-- **Chatting Feature** → Real-time chat for participants and organizers.  
+- **Event Analytics** → Track attendance, popular events, and user engagement.  
+- **Upcoming Event Notifications** → Notify users about upcoming events via email or in-app alerts.  
 
 ---
 
